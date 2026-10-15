@@ -39,7 +39,20 @@
                 </div>
             {% endif %}
 
+            {% if messages %}
+                {% for message in messages %}
+                    <div class="rounded-lg bg-rose-50 border border-rose-200 px-4 py-3 text-sm text-rose-800">{{ message }}</div>
+                {% endfor %}
+            {% endif %}
+
             <!-- Form Area -->
+            {% if google_signup_enabled %}
+                <a href="{% url 'google_signup' %}" class="w-full rounded-lg border border-slate-300 px-4 py-3 font-semibold text-slate-700 hover:bg-slate-50 flex items-center justify-center gap-3">
+                    <svg aria-hidden="true" class="h-5 w-5" viewBox="0 0 48 48"><path fill="#EA4335" d="M24 9.5c3.54 0 6.71 1.22 9.21 3.6l6.85-6.85C35.9 2.38 30.47 0 24 0 14.62 0 6.51 5.38 2.56 13.22l7.98 6.19C12.43 13.72 17.74 9.5 24 9.5z"/><path fill="#4285F4" d="M46.98 24.55c0-1.57-.15-3.09-.38-4.55H24v9.02h12.9c-.58 2.96-2.25 5.48-4.73 7.18l7.68 5.95c4.48-4.14 7.13-10.24 7.13-17.6z"/><path fill="#FBBC05" d="M10.54 28.59A14.4 14.4 0 0 1 9.75 24c0-1.59.27-3.13.76-4.59l-7.98-6.19A23.9 23.9 0 0 0 0 24c0 3.88.93 7.55 2.56 10.78l7.98-6.19z"/><path fill="#34A853" d="M24 48c6.48 0 11.93-2.13 15.9-5.8l-7.68-5.95c-2.13 1.43-4.86 2.27-8.22 2.27-6.26 0-11.57-4.22-13.46-9.91l-7.98 6.19C6.51 42.62 14.62 48 24 48z"/></svg>
+                    Continue with Google
+                </a>
+                <div class="my-5 flex items-center gap-3 text-xs text-slate-400"><span class="h-px flex-1 bg-slate-200"></span>OR<span class="h-px flex-1 bg-slate-200"></span></div>
+            {% endif %}
             <form method="POST" class="django-form-wrapper space-y-4">
                 {% csrf_token %}
 
@@ -54,6 +67,10 @@
                     Login
                 </button>
             </form>
+
+            <p class="-mt-3 text-right text-sm">
+                <a href="{% url 'password_reset' %}" class="font-semibold text-athletics-blue hover:underline">Forgot your password?</a>
+            </p>
 
             <!-- Navigation Links -->
             <div class="pt-5 border-t border-slate-100 text-center text-xs text-slate-500 font-medium space-y-3">

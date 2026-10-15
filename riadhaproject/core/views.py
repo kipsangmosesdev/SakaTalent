@@ -1,7 +1,17 @@
 from django.contrib import messages
+import json
+import secrets
+import urllib.parse
+import urllib.request
+
+from django.conf import settings
 from django.contrib.auth import login
 from django.contrib.auth.decorators import login_required
+from django.contrib.auth.models import User
+from django.db.models import Count, Q
 from django.shortcuts import get_object_or_404, redirect, render
+from django.urls import reverse
+from django.utils.crypto import get_random_string
 from core.models import AthleteProfile, Event, Performance, Verification
 from .forms import SignUpForm, AthleteProfileForm, PerformanceForm
 
@@ -16,7 +26,110 @@ def signup(request):
             return redirect('complete_profile')
     else:
         form = SignUpForm()
-    return render(request, 'core/signup.html',{'form': form})
+    return render(request, 'core/signup.html', {
+        'form': form,
+        'google_signup_enabled': bool(
+            settings.GOOGLE_CLIENT_ID and settings.GOOGLE_CLIENT_SECRET
+        ),
+    })
+
+
+def google_signup(request):
+    """Start Google OpenID Connect signup using a session-bound state value."""
+    if request.user.is_authenticated:
+        return redirect('dashboard')
+    if not settings.GOOGLE_CLIENT_ID or not settings.GOOGLE_CLIENT_SECRET:
+        messages.error(request, 'Google signup is not configured yet.')
+        return redirect('signup')
+
+    state = secrets.token_urlsafe(32)
+    request.session['google_signup_state'] = state
+    callback = _google_callback_uri(request)
+    query = urllib.parse.urlencode({
+        'client_id': settings.GOOGLE_CLIENT_ID,
+        'redirect_uri': callback,
+        'response_type': 'code',
+        'scope': 'openid email profile',
+        'state': state,
+        'prompt': 'select_account',
+    })
+    return redirect(f'https://accounts.google.com/o/oauth2/v2/auth?{query}')
+
+
+def google_signup_callback(request):
+    """Exchange Google's authorization code and validate the returned identity."""
+    if request.user.is_authenticated:
+        return redirect('dashboard')
+    expected_state = request.session.pop('google_signup_state', None)
+    if not expected_state or not secrets.compare_digest(
+        expected_state, request.GET.get('state', '')
+    ):
+        messages.error(request, 'Google signup could not be verified. Please try again.')
+        return redirect('signup')
+    if request.GET.get('error') or not request.GET.get('code'):
+        messages.error(request, 'Google signup was cancelled or could not be completed.')
+        return redirect('signup')
+
+    callback = _google_callback_uri(request)
+    payload = urllib.parse.urlencode({
+        'code': request.GET['code'],
+        'client_id': settings.GOOGLE_CLIENT_ID,
+        'client_secret': settings.GOOGLE_CLIENT_SECRET,
+        'redirect_uri': callback,
+        'grant_type': 'authorization_code',
+    }).encode()
+    try:
+        token_request = urllib.request.Request(
+            'https://oauth2.googleapis.com/token', data=payload,
+            headers={'Content-Type': 'application/x-www-form-urlencoded'},
+        )
+        with urllib.request.urlopen(token_request, timeout=10) as response:
+            token_data = json.loads(response.read())
+        id_token = token_data.get('id_token')
+        if not id_token:
+            raise ValueError('Missing Google ID token')
+        verify_request = urllib.request.Request(
+            'https://oauth2.googleapis.com/tokeninfo?id_token=' +
+            urllib.parse.quote(id_token, safe='')
+        )
+        with urllib.request.urlopen(verify_request, timeout=10) as response:
+            identity = json.loads(response.read())
+        if (identity.get('aud') != settings.GOOGLE_CLIENT_ID
+                or identity.get('iss') not in {'accounts.google.com', 'https://accounts.google.com'}
+                or identity.get('email_verified') not in {True, 'true'}
+                or not identity.get('email')):
+            raise ValueError('Google identity did not pass validation')
+    except Exception:
+        messages.error(request, 'We could not verify your Google account. Please try again.')
+        return redirect('signup')
+
+    email = identity['email'].strip().lower()
+    user = User.objects.filter(email__iexact=email).first()
+    if user is None:
+        name = identity.get('name', '').strip().split(maxsplit=1)
+        first_name = identity.get('given_name', name[0] if name else '')[:150]
+        last_name = identity.get('family_name', name[1] if len(name) > 1 else '')[:150]
+        base = (email.partition('@')[0] or 'athlete')[:120]
+        username = base
+        while User.objects.filter(username__iexact=username).exists():
+            username = f'{base[:110]}_{get_random_string(8).lower()}'
+        user = User.objects.create_user(
+            username=username,
+            email=email,
+            first_name=first_name,
+            last_name=last_name,
+        )
+    login(request, user, backend='django.contrib.auth.backends.ModelBackend')
+    return redirect(
+        'dashboard' if hasattr(user, 'athlete_profile') else 'complete_profile'
+    )
+
+
+def _google_callback_uri(request):
+    """Use a configured public URL when TLS terminates at a reverse proxy."""
+    return settings.GOOGLE_REDIRECT_URI or request.build_absolute_uri(
+        reverse('google_signup_callback')
+    )
 
 @login_required
 def complete_profile(request):
@@ -69,8 +182,15 @@ def dashboard(request):
     except AthleteProfile.DoesNotExist:
         return redirect('complete_profile')
 
-    verified_performances = Performance.objects.filter(
-        athlete=athlete,
+    athlete_performances = Performance.objects.filter(athlete=athlete)
+    performance_stats = athlete_performances.aggregate(
+        total=Count('id'),
+        verified=Count('id', filter=Q(verification__status='APPROVED')),
+        pending=Count('id', filter=Q(verification__status='PENDING')),
+    )
+    performance_stats['events'] = athlete_performances.values('event_id').distinct().count()
+
+    verified_performances = athlete_performances.filter(
         verification__status='APPROVED'
     ).select_related('event')
 
@@ -106,6 +226,7 @@ def dashboard(request):
         {
             'athlete': athlete,
             'rankings': rankings,
+            'performance_stats': performance_stats,
         }
     )
 

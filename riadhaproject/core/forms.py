@@ -6,20 +6,40 @@ from django.contrib.auth.models import User
 from .models import AthleteProfile, Event, Performance
 
 class SignUpForm(UserCreationForm):
-    first_name = forms.CharField(max_length=100, required=True)
-    last_name = forms.CharField(max_length=100, required=True)
+    full_name = forms.CharField(
+        max_length=301,
+        required=True,
+        label='Full name',
+        help_text='Enter all your given and family names.',
+    )
     email = forms.EmailField(required=True)
 
     class Meta:
         model = User
         fields = (
             'username',
-            'first_name',
-            'last_name',
+            'full_name',
             'email',
             'password1',
             'password2',
         )
+
+    def clean_full_name(self):
+        full_name = ' '.join(self.cleaned_data['full_name'].split())
+        name_parts = full_name.split(' ', 1)
+        if len(name_parts[0]) > 150 or (len(name_parts) > 1 and len(name_parts[1]) > 150):
+            raise forms.ValidationError('Please keep each part of your name to 150 characters or fewer.')
+        return full_name
+
+    def save(self, commit=True):
+        user = super().save(commit=False)
+        name_parts = self.cleaned_data['full_name'].split(' ', 1)
+        user.first_name = name_parts[0]
+        user.last_name = name_parts[1] if len(name_parts) > 1 else ''
+        if commit:
+            user.save()
+            self.save_m2m()
+        return user
 
 
 class AthleteProfileForm(forms.ModelForm):
