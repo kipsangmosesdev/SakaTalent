@@ -1,0 +1,76 @@
+{% extends "core/base.html" %}
+
+{% block title %}Login - TalentRise{% endblock %}
+
+{% block content %}
+<div class="min-h-[70vh] flex flex-col justify-center items-center py-6 px-4">
+    
+    <!-- Auth Card Container -->
+    <div class="w-full max-w-md bg-white rounded-xl border border-slate-200 shadow-xl overflow-hidden">
+        
+        <!-- Card Header Banner -->
+        <div class="bg-athletics-navy px-6 py-8 text-center border-b border-slate-800">
+            <span class="inline-flex items-center justify-center w-12 h-12 rounded-lg bg-athletics-orange text-white font-heading font-extrabold text-2xl tracking-wider mb-3 shadow-md">
+                TR
+            </span>
+            <h1 class="font-heading text-2xl font-extrabold text-white uppercase tracking-wider">
+                TALENT<span class="text-athletics-orange">RISE</span>
+            </h1>
+            <h2 class="font-heading text-xs font-bold text-slate-400 uppercase tracking-widest mt-1">
+                Account Login
+            </h2>
+        </div>
+
+        <!-- Card Body -->
+        <div class="p-6 sm:p-8 space-y-6">
+
+            <!-- Authentication Error Notification -->
+            {% if form.errors %}
+                <div class="p-4 rounded-lg bg-rose-50 border border-rose-200 text-rose-800 text-sm font-medium flex items-start gap-3">
+                    <svg class="w-5 h-5 text-rose-600 flex-shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"/>
+                    </svg>
+                    <div>
+                        <p class="font-bold text-xs uppercase tracking-wider text-rose-900">Login Failed</p>
+                        <p class="text-xs text-rose-700 mt-0.5">
+                            Your username or password is incorrect. Please try again.
+                        </p>
+                    </div>
+                </div>
+            {% endif %}
+
+            <!-- Form Area -->
+            <form method="POST" class="django-form-wrapper space-y-4">
+                {% csrf_token %}
+
+                <!-- Standard Django form paragraph rendering -->
+                <div class="space-y-4">
+                    {{ form.as_p }}
+                </div>
+
+                <!-- Energetic Submit CTA -->
+                <button type="submit" 
+                        class="w-full mt-6 py-3 px-4 rounded-lg bg-athletics-orange hover:bg-athletics-orangeHover text-black font-heading font-bold text-sm uppercase tracking-wider shadow-md hover:shadow-lg transition-all transform active:scale-[0.99] flex justify-center items-center">
+                    Login
+                </button>
+            </form>
+
+            <!-- Navigation Links -->
+            <div class="pt-5 border-t border-slate-100 text-center text-xs text-slate-500 font-medium space-y-3">
+                <p>
+                    Don't have an account?
+                    <a href="{% url 'signup' %}" class="font-bold text-athletics-blue hover:text-athletics-blueHover hover:underline ml-1">
+                        Create an account
+                    </a>
+                </p>
+                <p>
+                    <a href="{% url 'index' %}" class="text-slate-400 hover:text-slate-700 uppercase tracking-wider font-bold text-[11px] inline-flex items-center gap-1">
+                        <span>&larr;</span> Back to Home
+                    </a>
+                </p>
+            </div>
+
+        </div>
+    </div>
+</div>
+{% endblock %}

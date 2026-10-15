@@ -1,0 +1,10 @@
+<div class="grid grid-cols-3 gap-3">
+    {% for subwidget in widget.subwidgets %}
+        <div>
+            <label for="{{ subwidget.attrs.id }}" class="mb-1 block text-xs font-semibold uppercase tracking-wide text-slate-600">
+                {% if forloop.counter == 1 %}Hours{% elif forloop.counter == 2 %}Minutes{% else %}Seconds{% endif %}
+            </label>
+            {% include subwidget.template_name with widget=subwidget %}
+        </div>
+    {% endfor %}
+</div>

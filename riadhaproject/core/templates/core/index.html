@@ -1,0 +1,125 @@
+{% extends 'core/base.html' %}
+
+{% block title %}
+SakaTalent - Discover Hidden Athletics Talent
+{% endblock %}
+
+{% block content %}
+<div class="space-y-12 py-4">
+
+    <!-- Hero Section: Explicit Dark Navy Background (bg-slate-900) -->
+    <section class="relative rounded-2xl bg-slate-900 text-white overflow-hidden shadow-2xl border border-slate-800">
+        <!-- Background Graphic Accent -->
+        <div class="absolute inset-0 opacity-10 pointer-events-none bg-[radial-gradient(#f97316_1px,transparent_1px)] [background-size:16px_16px]"></div>
+        
+        <div class="relative max-w-4xl mx-auto px-6 py-12 sm:py-20 text-center space-y-6">
+            <!-- Kicker Badge -->
+            <div class="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-slate-800 border border-slate-700 text-xs font-heading font-bold uppercase tracking-widest text-orange-400">
+                <span class="w-2 h-2 rounded-full bg-orange-500 animate-pulse"></span>
+                Grassroots Athletics Platform
+            </div>
+
+            <!-- Main Heading: Solid White and Energetic Orange on Dark Navy -->
+            <h1 class="font-heading font-extrabold text-4xl sm:text-6xl tracking-tight uppercase leading-none text-white">
+                Discover Hidden <br class="hidden sm:inline" />
+                <span class="text-orange-500">Athletics Talent</span>
+            </h1>
+
+            <!-- Subtitle -->
+            <p class="text-slate-300 text-base sm:text-lg max-w-2xl mx-auto font-normal leading-relaxed">
+                SakaTalent helps identify, verify, rank, and showcase promising athletes from grassroots communities.
+            </p>
+
+            <!-- Action CTAs -->
+            <div class="pt-4 flex flex-col sm:flex-row items-center justify-center gap-4">
+                <a href="{% url 'signup' %}" 
+                   class="w-full sm:w-auto px-8 py-3.5 rounded-lg bg-orange-500 hover:bg-orange-600 text-white font-heading font-bold text-sm uppercase tracking-wider shadow-lg hover:shadow-orange-500/20 transition-all transform hover:-translate-y-0.5">
+                    Get Started Today
+                </a>
+                <a href="{% url 'talent_discovery' %}" 
+                   class="w-full sm:w-auto px-8 py-3.5 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-200 border border-slate-700 font-heading font-bold text-sm uppercase tracking-wider transition-all">
+                    Explore Talent
+                </a>
+            </div>
+        </div>
+    </section>
+
+    <!-- Core Audience & Feature Cards Section -->
+    <section class="grid grid-cols-1 md:grid-cols-3 gap-6">
+        
+        <!-- Card 1: For Athletes -->
+        <div class="bg-white rounded-xl border border-slate-200 p-6 sm:p-8 shadow-sm hover:shadow-md transition-shadow flex flex-col justify-between">
+            <div class="space-y-4">
+                <div class="w-12 h-12 rounded-lg bg-blue-50 text-blue-600 flex items-center justify-center">
+                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"/>
+                    </svg>
+                </div>
+                <h2 class="font-heading font-extrabold text-xl text-slate-900 uppercase tracking-wide">
+                    For Athletes
+                </h2>
+                <p class="text-slate-600 text-sm leading-relaxed">
+                    Create your profile, submit your verified performances, and get discovered by talent scouts and sponsors.
+                </p>
+            </div>
+            <div class="pt-6 mt-6 border-t border-slate-100">
+                <a href="{% url 'signup' %}" 
+                   class="inline-flex items-center text-xs font-heading font-bold uppercase tracking-wider text-blue-600 hover:text-blue-700 group">
+                    Register as an Athlete 
+                    <span class="ml-1 transition-transform group-hover:translate-x-1">&rarr;</span>
+                </a>
+            </div>
+        </div>
+
+        <!-- Card 2: For Sponsors -->
+        <div class="bg-white rounded-xl border border-slate-200 p-6 sm:p-8 shadow-sm hover:shadow-md transition-shadow flex flex-col justify-between">
+            <div class="space-y-4">
+                <div class="w-12 h-12 rounded-lg bg-orange-50 text-orange-500 flex items-center justify-center">
+                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 13.255A23.931 23.931 0 0112 15c-3.183 0-6.22-.62-9-1.745M16 6V4a2 2 0 00-2-2h-4a2 2 0 00-2 2v2m4 6h.01M5 20h14a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"/>
+                    </svg>
+                </div>
+                <h2 class="font-heading font-extrabold text-xl text-slate-900 uppercase tracking-wide">
+                    For Sponsors
+                </h2>
+                <p class="text-slate-600 text-sm leading-relaxed">
+                    Discover promising athletics talent and connect with athletes who have demonstrated their ability.
+                </p>
+            </div>
+            <div class="pt-6 mt-6 border-t border-slate-100">
+                <a href="{% url 'signup' %}" 
+                   class="inline-flex items-center text-xs font-heading font-bold uppercase tracking-wider text-orange-500 hover:text-orange-600 group">
+                    Create an Account 
+                    <span class="ml-1 transition-transform group-hover:translate-x-1">&rarr;</span>
+                </a>
+            </div>
+        </div>
+
+        <!-- Card 3: Explore Talent -->
+        <div class="bg-white rounded-xl border border-slate-200 p-6 sm:p-8 shadow-sm hover:shadow-md transition-shadow flex flex-col justify-between">
+            <div class="space-y-4">
+                <div class="w-12 h-12 rounded-lg bg-slate-100 text-slate-800 flex items-center justify-center">
+                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/>
+                    </svg>
+                </div>
+                <h2 class="font-heading font-extrabold text-xl text-slate-900 uppercase tracking-wide">
+                    Explore Talent
+                </h2>
+                <p class="text-slate-600 text-sm leading-relaxed">
+                    View verified athletes and their performances across regional events, track metrics, and rankings.
+                </p>
+            </div>
+            <div class="pt-6 mt-6 border-t border-slate-100">
+                <a href="{% url 'talent_discovery' %}" 
+                   class="inline-flex items-center text-xs font-heading font-bold uppercase tracking-wider text-slate-900 hover:text-blue-600 group">
+                    Browse Verified Athletes 
+                    <span class="ml-1 transition-transform group-hover:translate-x-1">&rarr;</span>
+                </a>
+            </div>
+        </div>
+
+    </section>
+
+</div>
+{% endblock %}
