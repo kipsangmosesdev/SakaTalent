@@ -42,7 +42,7 @@ Set a unique `DJANGO_SECRET_KEY` in Vercel and set `DJANGO_DEBUG=False`. Vercel 
 To enable Google sign-in, create a **Web application** OAuth client in Google Cloud Console. Add this exact authorized redirect URI:
 
 ```text
-https://saka-talent.vercel.app/signup/google/callback/
+https://sakatalent.vercel.app/signup/google/callback/
 ```
 
 In Vercel, add `GOOGLE_CLIENT_ID`, `GOOGLE_CLIENT_SECRET`, and `GOOGLE_REDIRECT_URI` to the **Production** environment. Set `GOOGLE_REDIRECT_URI` to the URI above. Keep the client secret in Vercel only; never commit it. Redeploy after saving these variables. The same Google button handles both login and signup: verified existing email addresses are signed in, while new addresses get an account and are sent to profile setup.
