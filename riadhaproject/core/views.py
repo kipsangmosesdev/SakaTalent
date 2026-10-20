@@ -41,14 +41,24 @@ def signup(request):
 
 def google_signup(request):
     """Start Google OpenID Connect signup using a session-bound state value."""
+    return _start_google_auth(request, 'signup')
+
+
+def google_login(request):
+    """Start Google OpenID Connect login using the shared callback."""
+    return _start_google_auth(request, 'login')
+
+
+def _start_google_auth(request, source):
     if request.user.is_authenticated:
         return redirect('dashboard')
     if not settings.GOOGLE_CLIENT_ID or not settings.GOOGLE_CLIENT_SECRET:
-        messages.error(request, 'Google signup is not configured yet.')
-        return redirect('signup')
+        messages.error(request, 'Google sign-in is not configured yet.')
+        return redirect('login' if source == 'login' else 'signup')
 
     state = secrets.token_urlsafe(32)
     request.session['google_signup_state'] = state
+    request.session['google_auth_source'] = source
     callback = _google_callback_uri(request)
     query = urllib.parse.urlencode({
         'client_id': settings.GOOGLE_CLIENT_ID,
@@ -63,6 +73,8 @@ def google_signup(request):
 
 def google_signup_callback(request):
     """Exchange Google's authorization code and validate the returned identity."""
+    source = request.session.pop('google_auth_source', 'signup')
+    return_to = 'login' if source == 'login' else 'signup'
     if request.user.is_authenticated:
         return redirect('dashboard')
     expected_state = request.session.pop('google_signup_state', None)
@@ -70,10 +82,14 @@ def google_signup_callback(request):
         expected_state, request.GET.get('state', '')
     ):
         messages.error(request, 'Google signup could not be verified. Please try again.')
-        return redirect('signup')
+        return redirect(return_to)
     if request.GET.get('error') or not request.GET.get('code'):
-        messages.error(request, 'Google signup was cancelled or could not be completed.')
-        return redirect('signup')
+        messages.error(request, 'Google sign-in was cancelled or could not be completed.')
+        return redirect(return_to)
+
+    if not settings.GOOGLE_CLIENT_ID or not settings.GOOGLE_CLIENT_SECRET:
+        messages.error(request, 'Google sign-in is not configured yet.')
+        return redirect(return_to)
 
     callback = _google_callback_uri(request)
     payload = urllib.parse.urlencode({
@@ -102,11 +118,12 @@ def google_signup_callback(request):
         if (identity.get('aud') != settings.GOOGLE_CLIENT_ID
                 or identity.get('iss') not in {'accounts.google.com', 'https://accounts.google.com'}
                 or identity.get('email_verified') not in {True, 'true'}
+                or not identity.get('sub')
                 or not identity.get('email')):
             raise ValueError('Google identity did not pass validation')
     except Exception:
         messages.error(request, 'We could not verify your Google account. Please try again.')
-        return redirect('signup')
+        return redirect(return_to)
 
     email = identity['email'].strip().lower()
     user = User.objects.filter(email__iexact=email).first()
@@ -131,10 +148,16 @@ def google_signup_callback(request):
 
 
 def _google_callback_uri(request):
-    """Use a configured public URL when TLS terminates at a reverse proxy."""
-    return settings.GOOGLE_REDIRECT_URI or request.build_absolute_uri(
-        reverse('google_signup_callback')
-    )
+    """Return the exact public callback configured for the OAuth client."""
+    if settings.GOOGLE_REDIRECT_URI:
+        return settings.GOOGLE_REDIRECT_URI
+
+    production_host = os.environ.get('VERCEL_PROJECT_PRODUCTION_URL', '').strip()
+    if production_host:
+        production_host = production_host.removeprefix('https://').strip('/')
+        return f'https://{production_host}{reverse("google_signup_callback")}'
+
+    return request.build_absolute_uri(reverse('google_signup_callback'))
 
 @login_required
 def complete_profile(request):

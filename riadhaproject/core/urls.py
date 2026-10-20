@@ -11,6 +11,7 @@ urlpatterns = [
     path('scout-agent/ask/', views.scout_agent_ask, name='scout_agent_ask'),
     path('signup/', views.signup, name='signup'),
     path('signup/google/', views.google_signup, name='google_signup'),
+    path('login/google/', views.google_login, name='google_login'),
     path('signup/google/callback/', views.google_signup_callback, name='google_signup_callback'),
     path('login/', auth_views.LoginView.as_view(
         template_name='core/login.html',

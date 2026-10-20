@@ -39,7 +39,15 @@ The app issues time-limited signed URLs for uploaded files. Keep the bucket priv
 
 Set a unique `DJANGO_SECRET_KEY` in Vercel and set `DJANGO_DEBUG=False`. Vercel supplies deployment host names, which Django adds to `ALLOWED_HOSTS` and `CSRF_TRUSTED_ORIGINS`. For a custom domain, also add its hostname to `DJANGO_ALLOWED_HOSTS` and its HTTPS origin to `DJANGO_CSRF_TRUSTED_ORIGINS`.
 
-Add production email and Google sign-in settings if the app needs them, including the Google OAuth callback URL for the deployed domain.
+To enable Google sign-in, create a **Web application** OAuth client in Google Cloud Console. Add this exact authorized redirect URI:
+
+```text
+https://saka-talent.vercel.app/signup/google/callback/
+```
+
+In Vercel, add `GOOGLE_CLIENT_ID`, `GOOGLE_CLIENT_SECRET`, and `GOOGLE_REDIRECT_URI` to the **Production** environment. Set `GOOGLE_REDIRECT_URI` to the URI above. Keep the client secret in Vercel only; never commit it. Redeploy after saving these variables. The same Google button handles both login and signup: verified existing email addresses are signed in, while new addresses get an account and are sent to profile setup.
+
+Add production email settings if the app needs them.
 
 ## 5. Deploy and verify
 
