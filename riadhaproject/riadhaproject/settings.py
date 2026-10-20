@@ -49,11 +49,14 @@ DEBUG = os.environ.get(
 ).lower() in {'1', 'true', 'yes', 'on'}
 
 ALLOWED_HOSTS = [host.strip() for host in os.environ.get(
-    'DJANGO_ALLOWED_HOSTS', '127.0.0.1,localhost,192.168.100.5'
+    'DJANGO_ALLOWED_HOSTS',
+    '127.0.0.1,localhost,192.168.100.5,saka-talent.vercel.app,sakatalent.vercel.app'
 ).split(',') if host.strip()]
 for vercel_host in (
     os.environ.get('VERCEL_URL', ''),
     os.environ.get('VERCEL_PROJECT_PRODUCTION_URL', ''),
+    'saka-talent.vercel.app',
+    'sakatalent.vercel.app',
 ):
     if vercel_host and vercel_host not in ALLOWED_HOSTS:
         ALLOWED_HOSTS.append(vercel_host)
@@ -63,13 +66,16 @@ CSRF_TRUSTED_ORIGINS = [
     origin.strip()
     for origin in os.environ.get(
         'DJANGO_CSRF_TRUSTED_ORIGINS',
-        'http://127.0.0.1:8000,http://localhost:8000,http://192.168.100.5:8000'
+        'http://127.0.0.1:8000,http://localhost:8000,http://192.168.100.5:8000,'
+        'https://saka-talent.vercel.app,https://sakatalent.vercel.app'
     ).split(',')
     if origin.strip()
 ]
 for vercel_host in (
     os.environ.get('VERCEL_URL', ''),
     os.environ.get('VERCEL_PROJECT_PRODUCTION_URL', ''),
+    'saka-talent.vercel.app',
+    'sakatalent.vercel.app',
 ):
     origin = f'https://{vercel_host}' if vercel_host else ''
     if origin and origin not in CSRF_TRUSTED_ORIGINS:
