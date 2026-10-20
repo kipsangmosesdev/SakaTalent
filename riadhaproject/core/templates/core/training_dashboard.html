@@ -1,0 +1,185 @@
+{% extends 'core/base.html' %}
+{% load time_filters compress %}
+
+{% block title %} Training Plan {% endblock %}
+
+{% block extra_head %}
+{% compress css %}<style>
+    .training-workspace input[type="date"] {
+        width: 100%;
+        min-width: 0;
+        max-width: 100%;
+        min-height: 44px;
+        padding: 0.625rem 0.75rem;
+        border: 1px solid #94a3b8;
+        border-radius: 0.75rem;
+        background-color: #fff;
+        color: #0f172a;
+        color-scheme: light;
+        font-size: 0.875rem;
+        box-shadow: 0 1px 2px rgba(15, 23, 42, 0.06);
+    }
+    .training-workspace input[type="date"]:focus {
+        outline: none;
+        border-color: #f97316;
+        box-shadow: 0 0 0 3px rgba(249, 115, 22, 0.18);
+    }
+    .training-workspace input[type="date"]::-webkit-calendar-picker-indicator {
+        cursor: pointer;
+        opacity: 0.85;
+    }
+    @media (max-width: 640px) {
+        .training-workspace .championship-form { width: 100%; }
+    }
+</style>{% endcompress %}
+{% endblock %}
+
+{% block content %}
+<div class="training-workspace mx-auto max-w-7xl space-y-6 py-3 sm:space-y-7 sm:py-4">
+    <header class="relative overflow-hidden rounded-3xl bg-stadium-900 p-5 text-white shadow-xl sm:p-9">
+        <div class="pointer-events-none absolute -right-12 -top-16 h-64 w-64 rounded-full border-[32px] border-white/5"></div>
+        <div class="relative flex flex-col gap-5 sm:flex-row sm:items-end sm:justify-between">
+            <div class="max-w-2xl">
+                <p class="mb-2 text-xs font-extrabold uppercase tracking-[0.2em] text-energy">Training workspace</p>
+                <h1 class="font-heading text-3xl font-extrabold uppercase tracking-tight text-white sm:text-4xl">Train toward your goals</h1>
+                <p class="mt-2 text-sm leading-6 text-slate-300">Set a target for each event and track your practice sessions as the competition approaches.</p>
+            </div>
+        </div>
+        <p class="relative mt-3 inline-flex items-center gap-2 rounded-full border border-emerald-400/20 bg-emerald-400/10 px-3 py-1.5 text-[10px] font-bold uppercase tracking-wider text-emerald-200">
+            <span class="h-1.5 w-1.5 rounded-full bg-emerald-400"></span> Training entries stay separate from verified competition results
+        </p>
+    </header>
+
+    <div class="grid min-w-0 gap-6 lg:grid-cols-[minmax(0,1fr)_20rem]">
+        <section class="space-y-4" aria-labelledby="targets-heading">
+            <div class="flex flex-wrap items-end justify-between gap-3">
+                <div>
+                    <p class="text-xs font-bold uppercase tracking-[0.15em] text-orange-600">Your events</p>
+                    <h2 id="targets-heading" class="mt-1 font-heading text-2xl font-extrabold uppercase text-slate-900">Event targets</h2>
+                </div>
+                <span class="rounded-full bg-slate-100 px-3 py-1 text-xs font-bold text-slate-600">{{ targets|length }} target{{ targets|length|pluralize }}</span>
+            </div>
+
+            {% if targets %}
+                {% for target in targets %}
+                <article class="min-w-0 overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm">
+                    <div class="border-b border-slate-100 bg-gradient-to-r from-white to-slate-50 p-5 sm:p-6">
+                        <div class="flex flex-wrap items-start justify-between gap-3">
+                            <div class="min-w-0 flex-1">
+                                <h3 class="font-heading text-xl font-extrabold uppercase text-slate-900">{{ target.event.name }}</h3>
+                                <p class="mt-1 text-xs text-slate-500">{{ target.competition_description }}{% if target.competition_description %} &middot; {% endif %}Competition date: {{ target.competition_date|date:"M j, Y" }}</p>
+                            </div>
+                            {% if target.competition_date < today %}
+                                <span class="rounded-full bg-amber-100 px-3 py-1.5 text-[10px] font-extrabold uppercase tracking-wider text-amber-800">Competition passed</span>
+                            {% elif target.best_result and target.best_result.result <= target.target_result %}
+                                <span class="rounded-full bg-emerald-100 px-3 py-1.5 text-[10px] font-extrabold uppercase tracking-wider text-emerald-800">Target reached</span>
+                            {% else %}
+                                <span class="rounded-full bg-blue-50 px-3 py-1.5 text-[10px] font-extrabold uppercase tracking-wider text-blue-800">In progress</span>
+                            {% endif %}
+                        </div>
+                        <div class="mt-5 grid grid-cols-2 gap-3 sm:grid-cols-3">
+                            <div class="rounded-xl bg-white p-3 ring-1 ring-slate-200/80">
+                                <p class="text-[9px] font-extrabold uppercase tracking-wider text-slate-500">Target time</p>
+                                <p class="mt-1 font-heading text-xl font-extrabold text-orange-600">{{ target.target_result|format_seconds }}</p>
+                            </div>
+                            <div class="rounded-xl bg-white p-3 ring-1 ring-slate-200/80">
+                                <p class="text-[9px] font-extrabold uppercase tracking-wider text-slate-500">Training best</p>
+                                <p class="mt-1 font-heading text-xl font-extrabold text-slate-900">{% if target.best_result %}{{ target.best_result.result|format_seconds }}{% else %}&mdash;{% endif %}</p>
+                            </div>
+                            <div class="col-span-2 rounded-xl bg-white p-3 ring-1 ring-slate-200/80 sm:col-span-1">
+                                <p class="text-[9px] font-extrabold uppercase tracking-wider text-slate-500">Sessions logged</p>
+                                <p class="mt-1 font-heading text-xl font-extrabold text-slate-900">{{ target.training_count }}</p>
+                            </div>
+                        </div>
+                        <div class="mt-4 rounded-xl px-4 py-3 text-sm leading-6 {% if target.best_result and target.best_result.result <= target.target_result %}bg-emerald-50 text-emerald-900{% elif target.competition_date < today %}bg-amber-50 text-amber-900{% else %}bg-blue-50 text-blue-900{% endif %}">
+                            {% if target.best_result and target.best_result.result <= target.target_result %}
+                                {% if target.time_gap %}
+                                    <strong>Congratulations!</strong> You beat your target by {{ target.time_gap|format_seconds }}. Keep it up!
+                                {% else %}
+                                    <strong>Congratulations!</strong> You reached your target time. Keep it up!
+                                {% endif %}
+                            {% elif target.competition_date < today %}
+                                {% if target.best_result %}
+                                    Competition date passed. Your best was {{ target.time_gap|format_seconds }} over your target. Keep training for your next competition.
+                                {% else %}
+                                    Competition date passed with no training times logged. Add a target for your next competition and keep training.
+                                {% endif %}
+                            {% elif target.best_result %}
+                                You need to improve your best by {{ target.time_gap|format_seconds }} to reach your target by competition day.
+                            {% else %}
+                                Log a training time to see how close you are to your target.
+                            {% endif %}
+                        </div>
+                    </div>
+
+                    <div class="grid gap-5 p-5 sm:p-6 xl:grid-cols-[minmax(0,1fr)_18rem]">
+                        <div>
+                            <h4 class="font-heading text-sm font-extrabold uppercase tracking-wide text-slate-800">Training log</h4>
+                            {% if target.training_count %}
+                                <div class="mt-3 space-y-2">
+                                    {% for result in target.training_results.all %}
+                                    <div class="flex min-w-0 items-center justify-between gap-3 rounded-xl bg-slate-50 px-3 py-2.5">
+                                        <div class="min-w-0">
+                                            <p class="text-xs font-bold text-slate-800">{{ result.training_date|date:"M j, Y" }}</p>
+                                            {% if result.notes %}<p class="mt-0.5 truncate text-xs text-slate-500">{{ result.notes }}</p>{% endif %}
+                                        </div>
+                                        <span class="shrink-0 font-heading text-lg font-extrabold text-slate-900">{{ result.result|format_seconds }}</span>
+                                    </div>
+                                    {% endfor %}
+                                </div>
+                            {% else %}
+                                <p class="mt-3 rounded-xl border border-dashed border-slate-300 p-4 text-xs leading-5 text-slate-500">No training results yet. Log your first session to see your progress here.</p>
+                            {% endif %}
+                        </div>
+
+                        <form method="post" class="min-w-0 space-y-3 rounded-2xl bg-slate-50 p-4">
+                            {% csrf_token %}<input type="hidden" name="action" value="add_result"><input type="hidden" name="target_id" value="{{ target.pk }}">
+                            <div>
+                                <h4 class="font-heading text-sm font-extrabold uppercase tracking-wide text-slate-800">Log a session</h4>
+                                <p class="mt-1 text-[11px] leading-4 text-slate-500">Private training record. This will not affect rankings.</p>
+                            </div>
+                            {% with form=result_forms|get_item:target.pk %}
+                                {% for field in form.visible_fields %}
+                                <div>
+                                    <label for="{{ field.id_for_label }}" class="mb-1 block text-[10px] font-bold uppercase tracking-wider text-slate-600">{{ field.label }}</label>
+                                    {{ field }}
+                                    {% for error in field.errors %}<p class="mt-1 text-xs text-rose-600">{{ error }}</p>{% endfor %}
+                                </div>
+                                {% endfor %}
+                            {% endwith %}
+                            <button class="w-full rounded-xl bg-electric px-4 py-3 text-xs font-extrabold uppercase tracking-wider text-white transition hover:bg-electric-hover">Save training result</button>
+                        </form>
+                    </div>
+                </article>
+                {% endfor %}
+            {% else %}
+                <div class="rounded-2xl border border-dashed border-slate-300 bg-white p-8 text-center">
+                    <h3 class="font-heading text-lg font-extrabold uppercase text-slate-800">Choose your first event</h3>
+                    <p class="mx-auto mt-2 max-w-md text-sm leading-6 text-slate-500">Set a target time for an event you plan to enter. You can log as many practice sessions as you need.</p>
+                </div>
+            {% endif %}
+        </section>
+
+        <aside class="h-fit min-w-0 rounded-2xl border border-slate-200 bg-white p-5 shadow-sm sm:p-6">
+            <p class="text-xs font-bold uppercase tracking-[0.15em] text-orange-600">Build your plan</p>
+            <h2 class="mt-1 font-heading text-xl font-extrabold uppercase text-slate-900">Add an event target</h2>
+            <p class="mt-2 text-xs leading-5 text-slate-500">Choose an event and set the time you want to reach by competition day.</p>
+            <form method="post" class="mt-5 space-y-4">
+                {% csrf_token %}<input type="hidden" name="action" value="add_target">
+                {% for field in target_form.visible_fields %}
+                <div>
+                    <label for="{{ field.id_for_label }}" class="mb-1.5 block text-[10px] font-bold uppercase tracking-wider text-slate-600">{{ field.label }}</label>
+                    {{ field }}
+                    {% if field.help_text %}<p class="mt-1 text-[11px] text-slate-500">{{ field.help_text }}</p>{% endif %}
+                    {% for error in field.errors %}<p class="mt-1 text-xs text-rose-600">{{ error }}</p>{% endfor %}
+                </div>
+                {% endfor %}
+                <button class="w-full rounded-xl bg-energy px-4 py-3 text-xs font-extrabold uppercase tracking-wider text-white transition hover:bg-energy-hover">Set event target</button>
+            </form>
+            <div class="mt-5 rounded-xl bg-orange-50 p-3 text-[11px] leading-5 text-orange-900">
+                Training targets and sessions are for your preparation only. Official results must still be submitted separately for verification.
+            </div>
+        </aside>
+    </div>
+</div>
+{% endblock %}

@@ -41,6 +41,15 @@ SakaTalent - Discover Hidden Athletics Talent
                     Explore Talent
                 </a>
             </div>
+            <div class="pt-2">
+                <a id="scout-agent-open" href="{% url 'scout_agent' %}" class="group inline-flex items-center gap-3 rounded-2xl border border-orange-400/30 bg-white/5 px-4 py-3 text-left transition hover:border-orange-300/70 hover:bg-white/10 focus:outline-none focus-visible:ring-2 focus-visible:ring-orange-400" aria-label="Open Scout AI to ask about athlete performances">
+                    <span class="flex h-11 w-11 items-center justify-center rounded-xl bg-orange-500 text-white shadow-lg shadow-orange-950/30 transition group-hover:scale-105" aria-hidden="true">
+                        <svg class="h-6 w-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8" d="M12 3l1.8 5.2L19 10l-5.2 1.8L12 17l-1.8-5.2L5 10l5.2-1.8L12 3zm6 11l1.2 2.8L22 18l-2.8 1.2L18 22l-1.2-2.8L14 18l2.8-1.2L18 14z"/></svg>
+                    </span>
+                    <span><span class="block text-sm font-extrabold uppercase tracking-wide text-white">Ask Scout AI</span><span class="mt-0.5 block text-xs text-slate-300">Find top athletes by county, event, or race</span></span>
+                    <span class="ml-2 text-orange-300 transition group-hover:translate-x-1" aria-hidden="true">→</span>
+                </a>
+            </div>
         </div>
     </section>
 
@@ -122,4 +131,7 @@ SakaTalent - Discover Hidden Athletics Talent
     </section>
 
 </div>
+<dialog id="scout-agent-dialog" class="scout-agent-dialog m-auto w-[calc(100%-1rem)] max-w-4xl max-h-[94dvh] overflow-visible rounded-2xl border-0 bg-transparent p-0 backdrop:bg-slate-950/70 backdrop:backdrop-blur-sm" aria-labelledby="scout-agent-title">
+    {% include 'core/scout_agent_chat.html' %}
+</dialog>
 {% endblock %}

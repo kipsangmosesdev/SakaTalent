@@ -13,6 +13,9 @@ https://docs.djangoproject.com/en/6.1/ref/settings/
 import os
 from pathlib import Path
 
+import dj_database_url
+from django.core.exceptions import ImproperlyConfigured
+
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
 # Load local environment variables from the project root without overriding the
@@ -41,20 +44,36 @@ if not SECRET_KEY:
     raise RuntimeError('DJANGO_SECRET_KEY must be set in the environment or .env file.')
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = os.environ.get('DJANGO_DEBUG', 'True').lower() in {'1', 'true', 'yes', 'on'}
+DEBUG = os.environ.get(
+    'DJANGO_DEBUG', 'False' if os.environ.get('VERCEL') else 'True'
+).lower() in {'1', 'true', 'yes', 'on'}
 
 ALLOWED_HOSTS = [host.strip() for host in os.environ.get(
-    'DJANGO_ALLOWED_HOSTS', '127.0.0.1,localhost'
+    'DJANGO_ALLOWED_HOSTS', '127.0.0.1,localhost,192.168.100.5'
 ).split(',') if host.strip()]
+for vercel_host in (
+    os.environ.get('VERCEL_URL', ''),
+    os.environ.get('VERCEL_PROJECT_PRODUCTION_URL', ''),
+):
+    if vercel_host and vercel_host not in ALLOWED_HOSTS:
+        ALLOWED_HOSTS.append(vercel_host)
 
 # Add trusted origins for CSRF protection
 CSRF_TRUSTED_ORIGINS = [
     origin.strip()
     for origin in os.environ.get(
-        'DJANGO_CSRF_TRUSTED_ORIGINS', 'http://127.0.0.1:8000'
+        'DJANGO_CSRF_TRUSTED_ORIGINS',
+        'http://127.0.0.1:8000,http://localhost:8000,http://192.168.100.5:8000'
     ).split(',')
     if origin.strip()
 ]
+for vercel_host in (
+    os.environ.get('VERCEL_URL', ''),
+    os.environ.get('VERCEL_PROJECT_PRODUCTION_URL', ''),
+):
+    origin = f'https://{vercel_host}' if vercel_host else ''
+    if origin and origin not in CSRF_TRUSTED_ORIGINS:
+        CSRF_TRUSTED_ORIGINS.append(origin)
 
 # Application definition
 
@@ -68,17 +87,20 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
+    'compressor',
     'core',
 ]
 
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
+    'htmlmin.middleware.HtmlMinifyMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.common.CommonMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
+    'htmlmin.middleware.MarkRequestMiddleware',
 ]
 
 ROOT_URLCONF = 'riadhaproject.urls'
@@ -104,12 +126,25 @@ WSGI_APPLICATION = 'riadhaproject.wsgi.application'
 # Database
 # https://docs.djangoproject.com/en/6.1/ref/settings/#databases
 
-DATABASES = {
-    'default': {
-        'ENGINE': 'django.db.backends.sqlite3',
-        'NAME': BASE_DIR / 'db.sqlite3',
+DATABASE_URL = os.environ.get('DATABASE_URL', '').strip()
+if DATABASE_URL:
+    DATABASES = {
+        'default': dj_database_url.parse(
+            DATABASE_URL,
+            conn_max_age=0,
+            conn_health_checks=True,
+            ssl_require=not DEBUG,
+        )
     }
-}
+    # Avoid server-side cursors when the Postgres provider uses transaction pooling.
+    DATABASES['default']['DISABLE_SERVER_SIDE_CURSORS'] = True
+else:
+    DATABASES = {
+        'default': {
+            'ENGINE': 'django.db.backends.sqlite3',
+            'NAME': BASE_DIR / 'db.sqlite3',
+        }
+    }
 
 
 # Password validation
@@ -151,12 +186,60 @@ STATIC_URL = '/static/'
 MEDIA_URL = '/media/'
 MEDIA_ROOT = BASE_DIR / 'media'
 
+# Vercel's function filesystem is ephemeral. Configure an S3-compatible bucket
+# (for example Supabase Storage) in production to persist uploaded files. Keep
+# file storage local when these variables are absent for easy local development.
+S3_STORAGE_KEYS = {
+    'AWS_STORAGE_BUCKET_NAME': os.environ.get('AWS_STORAGE_BUCKET_NAME', '').strip(),
+    'AWS_ACCESS_KEY_ID': os.environ.get('AWS_ACCESS_KEY_ID', '').strip(),
+    'AWS_SECRET_ACCESS_KEY': os.environ.get('AWS_SECRET_ACCESS_KEY', '').strip(),
+    'AWS_S3_ENDPOINT_URL': os.environ.get('AWS_S3_ENDPOINT_URL', '').strip(),
+}
+if any(S3_STORAGE_KEYS.values()):
+    missing_storage_keys = [key for key, value in S3_STORAGE_KEYS.items() if not value]
+    if missing_storage_keys:
+        raise ImproperlyConfigured(
+            'S3 media storage is partially configured. Set all of: '
+            + ', '.join(S3_STORAGE_KEYS)
+        )
+    STORAGES = {
+        'default': {
+            'BACKEND': 'storages.backends.s3.S3Storage',
+            'OPTIONS': {
+                'bucket_name': S3_STORAGE_KEYS['AWS_STORAGE_BUCKET_NAME'],
+                'access_key': S3_STORAGE_KEYS['AWS_ACCESS_KEY_ID'],
+                'secret_key': S3_STORAGE_KEYS['AWS_SECRET_ACCESS_KEY'],
+                'endpoint_url': S3_STORAGE_KEYS['AWS_S3_ENDPOINT_URL'],
+                'region_name': os.environ.get('AWS_S3_REGION_NAME', 'auto'),
+                'addressing_style': 'path',
+                'signature_version': 's3v4',
+                'querystring_auth': True,
+                'default_acl': None,
+                'querystring_expire': 3600,
+                'file_overwrite': False,
+            },
+        },
+        'staticfiles': {
+            'BACKEND': 'django.contrib.staticfiles.storage.StaticFilesStorage',
+        },
+    }
 
 # Collect static files here for deployment.
 STATIC_ROOT = BASE_DIR / "staticfiles"
 
+if os.environ.get('VERCEL'):
+    SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')
+    SESSION_COOKIE_SECURE = not DEBUG
+    CSRF_COOKIE_SECURE = not DEBUG
+STATICFILES_FINDERS = [
+    'django.contrib.staticfiles.finders.FileSystemFinder',
+    'django.contrib.staticfiles.finders.AppDirectoriesFinder',
+    'compressor.finders.CompressorFinder',
+]
 
-
+# Minify app HTML responses and CSS/JavaScript wrapped with {% compress %}.
+COMPRESS_ENABLED = True
+HTML_MINIFY = True
 
 # Email
 # https://docs.djangoproject.com/en/6.1/topics/email/#topic-email-configuration
@@ -175,7 +258,7 @@ DEFAULT_FROM_EMAIL = os.environ.get('DEFAULT_FROM_EMAIL', EMAIL_HOST_USER or 'we
 LOGIN_URL = '/login/'
 LOGIN_REDIRECT_URL = '/dashboard/'
 LOGOUT_REDIRECT_URL = '/login/'
-# Keep athletes signed in when they close the PWA or browser. Sessions expire
+# Keep athletes signed in when they close the browser or installed app. Sessions expire
 # after two weeks of inactivity unless they log out manually.
 SESSION_COOKIE_AGE = 60 * 60 * 24 * 14
 SESSION_EXPIRE_AT_BROWSER_CLOSE = False

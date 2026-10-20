@@ -145,3 +145,65 @@ class Verification(models.Model):
 
     def __str__(self):
         return f"{self.performance} - {self.status}"
+
+
+class TrainingPlan(models.Model):
+    """An athlete's preparation plan for an upcoming county championship."""
+
+    athlete = models.OneToOneField(
+        AthleteProfile,
+        on_delete=models.CASCADE,
+        related_name='training_plan',
+    )
+    championship_date = models.DateField()
+    competition_description = models.CharField(max_length=200, blank=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    def __str__(self):
+        return f"{self.athlete} — County Championship {self.championship_date}"
+
+
+class TrainingTarget(models.Model):
+    """A private, event-specific time goal in a training plan."""
+
+    plan = models.ForeignKey(
+        TrainingPlan,
+        on_delete=models.CASCADE,
+        related_name='targets',
+    )
+    event = models.ForeignKey(Event, on_delete=models.CASCADE, related_name='training_targets')
+    competition_description = models.CharField(max_length=200, blank=True)
+    competition_date = models.DateField()
+    # Like Performance.result, store the entered race time as total seconds.
+    target_result = models.DecimalField(max_digits=10, decimal_places=2)
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        ordering = ('event__name',)
+        constraints = [
+            models.UniqueConstraint(fields=('plan', 'event'), name='unique_training_target_per_event'),
+        ]
+
+    def __str__(self):
+        return f"{self.plan.athlete} — {self.event}: {self.target_result}s target"
+
+
+class TrainingResult(models.Model):
+    """An athlete-recorded practice result; deliberately separate from Performance."""
+
+    target = models.ForeignKey(
+        TrainingTarget,
+        on_delete=models.CASCADE,
+        related_name='training_results',
+    )
+    training_date = models.DateField()
+    result = models.DecimalField(max_digits=10, decimal_places=2)
+    notes = models.CharField(max_length=240, blank=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        ordering = ('-training_date', '-created_at')
+
+    def __str__(self):
+        return f"{self.target.event} training result — {self.result}s on {self.training_date}"

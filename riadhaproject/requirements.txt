@@ -1,0 +1,9 @@
+Django>=6.1,<6.2
+django-admin-interface
+django-colorfield
+Pillow
+django-compressor
+django-htmlmin
+dj-database-url
+psycopg[binary]
+django-storages[s3]

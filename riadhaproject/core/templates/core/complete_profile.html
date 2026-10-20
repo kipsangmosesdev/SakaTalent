@@ -1,4 +1,5 @@
 {% extends 'core/base.html' %}
+{% load compress %}
 
 {% block title %}
 {% if is_editing %}Edit Profile{% else %}Complete Profile{% endif %} - TalentRise
@@ -117,7 +118,7 @@
 
 {% block extra_head %}
 <!-- Scoped Input Styling for Standard Django Form Widgets -->
-<style>
+{% compress css %}<style>
     .django-styled-field input:not([type="checkbox"]):not([type="radio"]):not([type="file"]),
     .django-styled-field select,
     .django-styled-field textarea {
@@ -168,5 +169,5 @@
     .django-styled-field textarea {
         min-height: 100px;
     }
-</style>
+</style>{% endcompress %}
 {% endblock %}

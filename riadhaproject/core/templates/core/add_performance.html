@@ -1,4 +1,5 @@
 {% extends 'core/base.html' %}
+{% load compress %}
 
 {% block title %}
 Add Performance - TalentRise
@@ -105,13 +106,13 @@ Add Performance - TalentRise
             </div>
 
             <!-- Action Controls -->
-            <div class="pt-6 border-t border-slate-100 flex items-center justify-end gap-3">
+            <div class="pt-6 border-t border-slate-100 flex flex-col-reverse sm:flex-row sm:items-center sm:justify-end gap-3">
                 <a href="{% url 'my_performances' %}" 
-                   class="px-5 py-2.5 rounded-xl border border-slate-300 text-slate-700 hover:bg-slate-50 font-heading font-bold text-xs uppercase tracking-wider transition-colors">
+                   class="w-full sm:w-auto px-5 py-3 sm:py-2.5 rounded-xl border border-slate-300 text-slate-700 hover:bg-slate-50 font-heading font-bold text-xs uppercase tracking-wider transition-colors text-center">
                     Cancel
                 </a>
                 <button type="submit" 
-                        class="px-6 py-2.5 rounded-xl bg-orange-600 hover:bg-orange-700 text-white font-heading font-bold text-xs uppercase tracking-wider shadow-sm hover:shadow transition-all focus:outline-none focus:ring-2 focus:ring-orange-500/40">
+                        class="w-full sm:w-auto px-6 py-3 sm:py-2.5 rounded-xl bg-orange-600 hover:bg-orange-700 text-white font-heading font-bold text-xs uppercase tracking-wider shadow-sm hover:shadow transition-all focus:outline-none focus:ring-2 focus:ring-orange-500/40">
                     Save Performance
                 </button>
             </div>
@@ -124,7 +125,7 @@ Add Performance - TalentRise
 
 {% block extra_head %}
 <!-- Input Styling Wrapper for Standard Django Widgets -->
-<style>
+{% compress css %}<style>
     .django-styled-field input[type="text"],
     .django-styled-field input[type="number"],
     .django-styled-field input[type="date"],
@@ -154,5 +155,5 @@ Add Performance - TalentRise
     .django-styled-field textarea {
         min-height: 80px;
     }
-</style>
+</style>{% endcompress %}
 {% endblock %}

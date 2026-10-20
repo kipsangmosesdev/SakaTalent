@@ -27,3 +27,9 @@ def format_seconds(value):
     if minutes:
         return f'{minutes}m {seconds:02d}.{centiseconds:02d}s'
     return f'{seconds}.{centiseconds:02d}s'
+
+
+@register.filter
+def get_item(mapping, key):
+    """Look up a form in a context dictionary by its target id."""
+    return mapping.get(key)

@@ -7,6 +7,8 @@ from . import views
 
 urlpatterns = [
     path('', views.index, name='index'),
+    path('scout-agent/', views.scout_agent, name='scout_agent'),
+    path('scout-agent/ask/', views.scout_agent_ask, name='scout_agent_ask'),
     path('signup/', views.signup, name='signup'),
     path('signup/google/', views.google_signup, name='google_signup'),
     path('signup/google/callback/', views.google_signup_callback, name='google_signup_callback'),
@@ -40,6 +42,7 @@ urlpatterns = [
     path('add-performance/', views.add_performance, name='add_performance'),
     path('my-performances/', views.my_performances, name='my_performances'),
     path('dashboard/', views.dashboard,name='dashboard'),
+    path('training/', views.training_dashboard, name='training_dashboard'),
     path('rankings/<int:event_id>/', views.rankings, name='rankings'),
     path('talent/', views.talent_discovery, name='talent_discovery'),
     path('athlete/<int:athlete_id>/', views.athlete_detail, name='athlete_detail'),

@@ -3,7 +3,8 @@ from django.contrib.auth.forms import UserCreationForm
 from decimal import Decimal, ROUND_HALF_UP
 
 from django.contrib.auth.models import User
-from .models import AthleteProfile, Event, Performance
+from django.utils import timezone
+from .models import AthleteProfile, Event, Performance, TrainingPlan, TrainingTarget, TrainingResult
 
 class SignUpForm(UserCreationForm):
     full_name = forms.CharField(
@@ -180,3 +181,76 @@ class PerformanceForm(forms.ModelForm):
                 }
             )
         }
+
+
+class TrainingPlanForm(forms.ModelForm):
+    competition_description = forms.CharField(
+        label='Event/competition description',
+        required=False,
+        max_length=200,
+        widget=forms.TextInput(attrs={'placeholder': 'Example: Nairobi County Championships'}),
+    )
+    championship_date = forms.DateField(
+        label='Competition date',
+        widget=forms.DateInput(attrs={'type': 'date'}),
+    )
+
+    class Meta:
+        model = TrainingPlan
+        fields = ('competition_description', 'championship_date')
+        widgets = {
+            'championship_date': forms.DateInput(attrs={'type': 'date'}),
+        }
+
+    def clean_championship_date(self):
+        championship_date = self.cleaned_data['championship_date']
+        if championship_date < timezone.localdate():
+            raise forms.ValidationError('Choose today or a future competition date.')
+        return championship_date
+
+
+class TrainingTargetForm(forms.ModelForm):
+    target_result = RaceTimeField(label='Target time')
+    competition_description = forms.CharField(label='Event/competition description', required=False, max_length=200, widget=forms.TextInput(attrs={'placeholder': 'Example: Nairobi County Championships'}))
+    competition_date = forms.DateField(label='Competition date', widget=forms.DateInput(attrs={'type': 'date'}))
+
+    class Meta:
+        model = TrainingTarget
+        fields = ('event', 'target_result', 'competition_description', 'competition_date')
+
+    def __init__(self, *args, plan, **kwargs):
+        self.plan = plan
+        super().__init__(*args, **kwargs)
+        self.fields['event'].queryset = Event.objects.order_by('name')
+        if not self.is_bound:
+            self.fields['competition_date'].initial = plan.championship_date
+
+    def clean_event(self):
+        event = self.cleaned_data['event']
+        if self.plan.targets.filter(event=event).exists():
+            raise forms.ValidationError('You already have a target for this event in this competition plan.')
+        return event
+
+
+class TrainingResultForm(forms.ModelForm):
+    result = RaceTimeField(label='Training time')
+
+    class Meta:
+        model = TrainingResult
+        fields = ('training_date', 'result', 'notes')
+        widgets = {
+            'training_date': forms.DateInput(attrs={'type': 'date'}),
+            'notes': forms.TextInput(attrs={'placeholder': 'Optional session notes'}),
+        }
+
+    def __init__(self, *args, target, **kwargs):
+        self.target = target
+        super().__init__(*args, **kwargs)
+
+    def clean_training_date(self):
+        training_date = self.cleaned_data['training_date']
+        if training_date > timezone.localdate():
+            raise forms.ValidationError('Training date cannot be in the future.')
+        if training_date >= self.target.competition_date:
+            raise forms.ValidationError('Training results must be dated before competition day.')
+        return training_date

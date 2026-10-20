@@ -18,10 +18,12 @@ from django.conf import settings
 from django.conf.urls.static import static
 from django.contrib import admin
 from django.urls import path, include
-from core.pwa import service_worker
+from core.pwa import manifest, pwa_asset, service_worker
 
 urlpatterns = [
     path('admin/', admin.site.urls),
+    path('manifest.webmanifest', manifest, name='pwa_manifest'),
+    path('pwa-assets/<str:asset_name>', pwa_asset, name='pwa_asset'),
     path('service-worker.js', service_worker, name='service_worker'),
     path('', include('core.urls')),
 ]

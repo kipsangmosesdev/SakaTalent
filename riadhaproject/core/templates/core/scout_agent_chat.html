@@ -1,0 +1,150 @@
+{% load compress %}
+{% compress css %}<style>
+    .scout-agent-dialog:not([open]) { display: none; }
+    .scout-chat-shell { height: min(760px, calc(100dvh - 17rem)); min-height: 420px; }
+    .scout-chat-messages { scrollbar-color: #cbd5e1 transparent; scrollbar-width: thin; }
+    .typing-dots { display: inline-flex; align-items: center; gap: 4px; min-height: 18px; }
+    .typing-dots span { width: 6px; height: 6px; border-radius: 999px; background: #94a3b8; animation: scout-dot 1s infinite ease-in-out; }
+    .typing-dots span:nth-child(2) { animation-delay: .15s; }
+    .typing-dots span:nth-child(3) { animation-delay: .3s; }
+    @keyframes scout-dot { 0%, 60%, 100% { transform: translateY(0); opacity: .45; } 30% { transform: translateY(-4px); opacity: 1; } }
+    .scout-agent-dialog .scout-chat-shell { height: min(760px, calc(94dvh - 2rem)); min-height: 360px; }
+    .scout-agent-dialog .scout-agent-close { display: inline-flex; }
+    .scout-agent-dialog #chat-verified-badge { display: none; }
+    .scout-agent-dialog .scout-chat-backlink { display: none; }
+    @media (max-width: 640px) {
+        .scout-chat-shell { height: calc(100dvh - 17rem); min-height: 430px; }
+        .scout-agent-dialog .scout-chat-shell { height: calc(94dvh - 2rem); min-height: 360px; }
+        .scout-agent-dialog { width: calc(100% - 1rem); }
+    }
+    @media (prefers-reduced-motion: reduce) { .typing-dots span { animation: none; } }
+</style>{% endcompress %}
+
+<section class="scout-chat-shell mx-auto flex w-full max-w-4xl flex-col overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-xl sm:rounded-3xl">
+    <header class="flex shrink-0 items-center gap-3 bg-slate-900 px-4 py-3.5 text-white sm:gap-4 sm:px-8 sm:py-5">
+        <span class="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-orange-500 shadow-lg shadow-orange-950/30 sm:h-12 sm:w-12 sm:rounded-2xl" aria-hidden="true">
+            <svg class="h-6 w-6 sm:h-7 sm:w-7" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8" d="M12 3l1.8 5.2L19 10l-5.2 1.8L12 17l-1.8-5.2L5 10l5.2-1.8L12 3zm6 11l1.2 2.8L22 18l-2.8 1.2L18 22l-1.2-2.8L14 18l2.8-1.2L18 14z"/></svg>
+        </span>
+        <div class="min-w-0"><p class="text-[10px] font-bold uppercase tracking-[.16em] text-orange-300 sm:text-xs sm:tracking-[.2em]">SakaTalent assistant</p><h1 id="scout-agent-title" class="mt-0.5 text-xl font-extrabold sm:mt-1 sm:text-2xl">Scout AI</h1></div>
+        <span id="chat-verified-badge" class="ml-auto inline-flex items-center gap-1.5 rounded-full border border-emerald-400/30 bg-emerald-400/10 px-2.5 py-1 text-[10px] font-semibold text-emerald-300 sm:px-3 sm:text-xs"><span class="h-1.5 w-1.5 rounded-full bg-emerald-400"></span>Verified data</span>
+        <button type="button" id="scout-agent-close" class="scout-agent-close ml-auto hidden h-9 w-9 shrink-0 items-center justify-center rounded-lg border border-white/15 text-slate-200 transition hover:bg-white/10 hover:text-white focus:outline-none focus:ring-2 focus:ring-orange-400" aria-label="Close Scout AI chat" title="Close chat">
+            <svg class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 6l12 12M18 6L6 18"/></svg>
+        </button>
+    </header>
+    <div id="chat-messages" class="scout-chat-messages flex min-h-0 flex-1 flex-col gap-4 overflow-x-hidden overflow-y-auto bg-slate-50 p-3.5 sm:gap-5 sm:p-8" aria-live="polite" aria-relevant="additions text">
+        <div class="max-w-[96%] self-start rounded-2xl rounded-tl-sm border border-slate-200 bg-white px-3.5 py-3 text-[13px] leading-5 text-slate-700 shadow-sm sm:max-w-[86%] sm:px-4 sm:py-3.5 sm:text-sm sm:leading-6">
+            Hi, I can help you explore athletes using approved race results. Ask for top performers by county or event, an athlete's results, or race results by competition.
+            <div class="mt-3 flex gap-2 overflow-x-auto pb-1 sm:flex-wrap sm:overflow-visible">
+                <button type="button" class="suggestion shrink-0 rounded-full border border-orange-100 bg-orange-50 px-3 py-2 text-[11px] font-semibold leading-4 text-orange-800 hover:bg-orange-100 sm:py-1.5 sm:text-xs">Who are the fastest in Nandi for 5000m?</button>
+                <button type="button" class="suggestion shrink-0 rounded-full border border-orange-100 bg-orange-50 px-3 py-2 text-[11px] font-semibold leading-4 text-orange-800 hover:bg-orange-100 sm:py-1.5 sm:text-xs">Are there athletes from Garisa?</button>
+                <button type="button" class="suggestion shrink-0 rounded-full border border-orange-100 bg-orange-50 px-3 py-2 text-[11px] font-semibold leading-4 text-orange-800 hover:bg-orange-100 sm:py-1.5 sm:text-xs">List athletes under 20</button>
+                <button type="button" class="suggestion shrink-0 rounded-full border border-orange-100 bg-orange-50 px-3 py-2 text-[11px] font-semibold leading-4 text-orange-800 hover:bg-orange-100 sm:py-1.5 sm:text-xs">List only top ladies in Bomet county</button>
+            </div>
+        </div>
+    </div>
+    <form id="chat-form" class="shrink-0 border-t border-slate-200 bg-white p-3.5 sm:p-5">
+        {% csrf_token %}
+        <label for="chat-question" class="mb-2 block text-[10px] font-bold uppercase tracking-wider text-slate-500 sm:text-xs">Message Scout AI</label>
+        <div class="flex items-end gap-2 sm:gap-3">
+            <textarea id="chat-question" rows="1" maxlength="500" required placeholder="Ask about county, event, athlete, or race..." class="min-h-[48px] min-w-0 flex-1 resize-none rounded-xl border border-slate-300 px-3 py-3 text-sm leading-5 focus:border-orange-500 focus:ring-2 focus:ring-orange-100 sm:min-h-[52px] sm:px-4"></textarea>
+            <button id="chat-submit" type="submit" class="inline-flex h-12 shrink-0 items-center justify-center gap-2 rounded-xl bg-orange-500 px-4 text-xs font-extrabold uppercase tracking-wide text-white shadow-sm transition hover:bg-orange-600 focus:outline-none focus:ring-2 focus:ring-orange-300 focus:ring-offset-2 disabled:cursor-wait disabled:opacity-60 sm:h-[52px] sm:px-5 sm:text-sm"><span class="hidden sm:inline">Send</span><span class="sm:hidden">Ask</span><svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 12h14m-7-7l7 7-7 7"/></svg></button>
+        </div>
+        <p class="mt-2 text-[10px] leading-4 text-slate-400 sm:text-xs">Uses approved results only. Lower race times are faster.</p>
+    </form>
+</section>
+<div class="scout-chat-backlink mx-auto mt-3 max-w-4xl"><a href="{% url 'talent_discovery' %}" class="text-xs font-semibold text-slate-600 hover:text-orange-600 sm:text-sm">&larr; Browse all talent</a></div>
+
+{% compress js %}<script>
+(() => {
+    const form = document.getElementById('chat-form');
+    const input = document.getElementById('chat-question');
+    const messages = document.getElementById('chat-messages');
+    const submit = document.getElementById('chat-submit');
+    const csrf = form.querySelector('[name=csrfmiddlewaretoken]').value;
+    const dialog = document.getElementById('scout-agent-dialog');
+    const closeButton = document.getElementById('scout-agent-close');
+    const openButton = document.getElementById('scout-agent-open');
+
+    const addMessage = (text, sender) => {
+        const bubble = document.createElement('div');
+        bubble.className = sender === 'user'
+            ? 'max-w-[92%] break-words self-end rounded-2xl rounded-tr-sm bg-slate-900 px-3.5 py-2.5 text-[13px] leading-5 text-white shadow-sm whitespace-pre-wrap sm:max-w-[82%] sm:px-4 sm:py-3 sm:text-sm sm:leading-6'
+            : 'max-w-[96%] break-words self-start rounded-2xl rounded-tl-sm border border-slate-200 bg-white px-3.5 py-2.5 text-[13px] leading-5 text-slate-700 shadow-sm whitespace-pre-wrap sm:max-w-[86%] sm:px-4 sm:py-3 sm:text-sm sm:leading-6';
+        bubble.textContent = text;
+        messages.appendChild(bubble);
+        messages.scrollTop = messages.scrollHeight;
+        return bubble;
+    };
+    const showTyping = () => {
+        const bubble = addMessage('', 'agent');
+        bubble.setAttribute('aria-label', 'Scout AI is typing');
+        bubble.innerHTML = '<span class="typing-dots" aria-hidden="true"><span></span><span></span><span></span></span>';
+        return bubble;
+    };
+    const revealReply = (bubble, text) => new Promise(resolve => {
+        bubble.removeAttribute('aria-label');
+        bubble.textContent = '';
+        const words = text.split(/(\s+)/).filter(part => part.length);
+        const wordCount = words.filter(part => !/^\s+$/.test(part)).length;
+        const delay = Math.max(22, Math.min(52, 2200 / Math.max(wordCount, 1)));
+        if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
+            bubble.textContent = text;
+            resolve();
+            return;
+        }
+        let index = 0;
+        const typeNext = () => {
+            if (index >= words.length) return resolve();
+            bubble.appendChild(document.createTextNode(words[index++]));
+            messages.scrollTop = messages.scrollHeight;
+            window.setTimeout(typeNext, delay);
+        };
+        typeNext();
+    });
+
+    if (dialog && openButton && typeof dialog.showModal === 'function') {
+        openButton.addEventListener('click', event => {
+            event.preventDefault();
+            dialog.showModal();
+            input.focus();
+        });
+        closeButton.addEventListener('click', () => dialog.close());
+        dialog.addEventListener('click', event => {
+            if (event.target === dialog) dialog.close();
+        });
+    }
+
+    form.addEventListener('submit', async event => {
+        event.preventDefault();
+        const question = input.value.trim();
+        if (!question) return;
+        addMessage(question, 'user');
+        input.value = '';
+        submit.disabled = true;
+        const typing = showTyping();
+        let answer;
+        try {
+            const response = await fetch('{% url "scout_agent_ask" %}', {
+                method: 'POST',
+                headers: {'Content-Type': 'application/json', 'X-CSRFToken': csrf},
+                body: JSON.stringify({question}),
+            });
+            const data = await response.json();
+            answer = data.answer || data.error || 'I could not process that question. Please try again.';
+            await new Promise(resolve => window.setTimeout(resolve, 450));
+        } catch (error) {
+            answer = 'I could not reach the scouting service. Please try again.';
+        } finally {
+            submit.disabled = false;
+            input.focus();
+        }
+        await revealReply(typing, answer);
+        messages.scrollTop = messages.scrollHeight;
+    });
+
+    document.querySelectorAll('.suggestion').forEach(button => button.addEventListener('click', () => {
+        input.value = button.textContent;
+        form.requestSubmit();
+    }));
+})();
+</script>{% endcompress %}

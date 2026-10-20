@@ -1,18 +1,18 @@
-{% load static %}
+{% load static compress %}
 <!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
     <!-- Add meta colors -->
-    <meta name="theme-color" content="#0f172a">
+    <meta name="theme-color" content="#0b132b">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
     <meta name="apple-mobile-web-app-title" content="SakaTalent">
-    <link rel="manifest" href="{% static 'core/pwa/manifest.webmanifest' %}">
-    <link rel="icon" href="{% static 'core/pwa/icon.svg' %}" type="image/svg+xml">
-    <link rel="apple-touch-icon" href="{% static 'core/pwa/icon-192.png' %}">
+    <link rel="manifest" href="{% url 'pwa_manifest' %}">
+    <link rel="icon" href="{% static 'core/favicon.svg' %}" type="image/svg+xml">
+    <link rel="apple-touch-icon" href="{% url 'pwa_asset' 'icon-192.png' %}">
     <meta http-equiv="X-UA-Compatible" content="ie=edge">
     <title>{% block title %}SakaTalent | Peak Performance Platform{% endblock %}</title>
 
@@ -23,7 +23,7 @@
 
     <!-- Tailwind CSS (CDN for rapid utility styling without build setup) -->
     <script src="https://cdn.tailwindcss.com"></script>
-    <script>
+    {% compress js %}<script>
         tailwind.config = {
             theme: {
                 extend: {
@@ -49,15 +49,19 @@
                 }
             }
         }
-    </script>
+    </script>{% endcompress %}
 
     <!-- Base UI Styles & Resets -->
-    <style>
+    {% compress css %}<style>
         /* Global Typography & Background Settings */
         body {
             font-family: 'Inter', sans-serif;
             background-color: #f8fafc;
             color: #0f172a;
+        }
+
+        img, video, canvas, svg {
+            max-width: 100%;
         }
 
         h1, h2, h3, h4, .font-heading {
@@ -106,6 +110,24 @@
             outline: none;
             border-color: #2563eb;
             box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.15);
+        }
+
+        @media (max-width: 767px) {
+            input[type="text"], input[type="email"], input[type="password"],
+            input[type="number"], input[type="date"], input[type="url"],
+            select, textarea {
+                min-height: 44px;
+                font-size: 16px;
+            }
+
+            input[type="file"] {
+                max-width: 100%;
+                font-size: 0.8125rem;
+            }
+
+            main {
+                min-width: 0;
+            }
         }
 
         /* Keep result tables readable on phones by turning each row into a card. */
@@ -186,7 +208,7 @@
             background: #334155;
             border-radius: 4px;
         }
-    </style>
+    </style>{% endcompress %}
 
     {% block extra_head %}{% endblock %}
 </head>
@@ -226,6 +248,10 @@
                             Performances
                         </a>
 
+                        <a href="{% url 'training_dashboard' %}" {% if request.resolver_match.url_name == 'training_dashboard' %}aria-current="page"{% endif %} class="nav-link px-3 py-2.5 rounded-xl text-[11px] lg:text-xs font-bold uppercase tracking-wider text-slate-300 hover:bg-stadium-800">
+                            Training
+                        </a>
+
                         <a href="{% url 'add_performance' %}" {% if request.resolver_match.url_name == 'add_performance' %}aria-current="page"{% endif %} class="inline-flex items-center gap-2 px-3.5 py-2.5 rounded-xl bg-electric hover:bg-electric-hover text-white text-[11px] font-extrabold uppercase tracking-wider shadow-sm transition-all ml-1">
                             <span aria-hidden="true" class="text-base leading-none">+</span> Add Result
                         </a>
@@ -236,6 +262,12 @@
                     </a>
 
                 </nav>
+
+                <div class="hidden md:flex">
+                    <button type="button" data-pwa-install-open class="items-center rounded-lg border border-energy/50 px-3 py-2 text-[11px] font-extrabold uppercase tracking-wider text-orange-100 transition hover:bg-energy/15 hover:border-energy">
+                        Install app
+                    </button>
+                </div>
 
                 <!-- Auth Status & Profile Actions -->
                 <div class="hidden md:flex items-center pl-3 lg:pl-4 border-l border-white/10">
@@ -297,6 +329,9 @@
                 <a href="{% url 'my_performances' %}" {% if request.resolver_match.url_name == 'my_performances' %}aria-current="page"{% endif %} class="block px-4 py-3 rounded-xl text-sm font-bold uppercase tracking-wider text-slate-200 hover:bg-stadium-800">
                     Performances
                 </a>
+                <a href="{% url 'training_dashboard' %}" {% if request.resolver_match.url_name == 'training_dashboard' %}aria-current="page"{% endif %} class="block px-4 py-3 rounded-xl text-sm font-bold uppercase tracking-wider text-slate-200 hover:bg-stadium-800">
+                    Training plan
+                </a>
                 <a href="{% url 'add_performance' %}" {% if request.resolver_match.url_name == 'add_performance' %}aria-current="page"{% endif %} class="block px-4 py-3 rounded-xl bg-electric text-white font-bold uppercase tracking-wider text-center my-3 shadow-lg shadow-blue-950/30">
                     + Add Result
                 </a>
@@ -305,6 +340,9 @@
             <a href="{% url 'talent_discovery' %}" {% if request.resolver_match.url_name == 'talent_discovery' %}aria-current="page"{% endif %} class="block px-4 py-3 rounded-xl text-sm font-bold uppercase tracking-wider text-slate-200 hover:bg-stadium-800">
                 Discover Talent
             </a>
+            <button type="button" data-pwa-install-open class="w-full text-left px-4 py-3 rounded-xl text-sm font-bold uppercase tracking-wider text-orange-200 hover:bg-stadium-800">
+                Install SakaTalent
+            </button>
 
             <div class="pt-4 mt-3 border-t border-white/10">
                 {% if user.is_authenticated %}
@@ -344,14 +382,14 @@
     {% endif %}
 
     <!-- Main Content Area -->
-    <main class="flex-1 max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-8">
+    <main class="flex-1 max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-5 sm:py-8">
         {% block content %}
         {% endblock %}
     </main>
 
     <!-- Footer Area -->
     <footer class="bg-stadium-900 border-t border-slate-800 text-slate-400 py-8 mt-auto">
-        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex flex-col md:flex-row items-center justify-between gap-4">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex flex-col md:flex-row items-center justify-between gap-3 sm:gap-4 text-center md:text-left">
             
             <div class="flex items-center gap-2">
                 <span class="font-heading font-extrabold text-lg text-white italic">
@@ -366,28 +404,26 @@
         </div>
     </footer>
 
-    <!-- Install prompt: shown on first visit where the app is not already installed. -->
-    <div id="pwa-install-dialog" class="hidden fixed inset-0 z-[100] items-end sm:items-center justify-center bg-slate-950/60 p-4 backdrop-blur-sm" role="dialog" aria-modal="true" aria-labelledby="pwa-install-title" aria-describedby="pwa-install-description">
+    <div id="pwa-install-dialog" class="hidden fixed inset-0 z-[100] items-end justify-center bg-slate-950/60 p-4 backdrop-blur-sm sm:items-center" role="dialog" aria-modal="true" aria-labelledby="pwa-install-title" aria-describedby="pwa-install-instructions">
         <div class="w-full max-w-md rounded-3xl border border-white/10 bg-stadium-900 p-6 text-white shadow-2xl sm:p-7">
-            <div class="flex items-start gap-4">
-                <img src="{% static 'core/pwa/icon-192.png' %}" alt="" class="h-14 w-14 rounded-2xl shadow-lg shadow-orange-950/30">
-                <div class="min-w-0 flex-1">
+            <div class="flex items-start justify-between gap-4">
+                <div>
                     <p class="mb-1 text-[10px] font-extrabold uppercase tracking-[0.2em] text-energy">SakaTalent app</p>
-                    <h2 id="pwa-install-title" class="text-2xl font-extrabold text-white">Take your game with you</h2>
-                    <p id="pwa-install-description" class="mt-2 text-sm leading-6 text-slate-300">Install SakaTalent for quick access from your home screen.</p>
+                    <h2 id="pwa-install-title" class="text-2xl font-extrabold text-white">Install SakaTalent</h2>
                 </div>
-                <button id="pwa-install-close" type="button" class="-mr-2 -mt-2 rounded-lg p-2 text-slate-400 hover:bg-white/10 hover:text-white" aria-label="Close install prompt">&times;</button>
+                <button id="pwa-install-close" type="button" class="-mr-2 -mt-2 rounded-lg p-2 text-slate-400 hover:bg-white/10 hover:text-white" aria-label="Close install help">&times;</button>
             </div>
-            <p id="pwa-install-help" class="hidden mt-4 rounded-xl bg-white/5 px-4 py-3 text-sm leading-6 text-slate-300"></p>
-            <div class="mt-6 grid grid-cols-2 gap-3">
-                <button id="pwa-install-later" type="button" class="rounded-xl border border-white/15 px-4 py-3 text-xs font-bold uppercase tracking-wider text-slate-300 transition hover:bg-white/5">Maybe later</button>
-                <button id="pwa-install-button" type="button" class="rounded-xl bg-energy px-4 py-3 text-xs font-extrabold uppercase tracking-wider text-white shadow-lg shadow-orange-950/30 transition hover:bg-energy-hover">Install app</button>
+            <p id="pwa-install-instructions" class="mt-4 text-sm leading-6 text-slate-300"></p>
+            <p id="pwa-ngrok-note" class="mt-3 hidden rounded-xl border border-orange-300/20 bg-orange-400/10 p-3 text-sm leading-6 text-orange-100">On a free ngrok link, tap <strong>Visit</strong> on ngrok’s warning page first, then reload SakaTalent before installing.</p>
+            <p id="pwa-lan-note" class="mt-3 hidden rounded-xl border border-orange-300/20 bg-orange-400/10 p-3 text-sm leading-6 text-orange-100">This LAN address uses HTTP, so Chrome cannot install the PWA from it. Open the HTTPS ngrok link on your phone to install.</p>
+            <div class="mt-6 flex justify-end gap-3">
+                <button id="pwa-install-cancel" type="button" class="rounded-xl border border-white/15 px-4 py-3 text-xs font-bold uppercase tracking-wider text-slate-300 transition hover:bg-white/5">Close</button>
             </div>
         </div>
     </div>
 
     <!-- Minimal Native JS for Mobile Drawer Toggle -->
-    <script>
+    {% compress js %}<script>
         function toggleMobileMenu() {
             const menu = document.getElementById('mobile-menu');
             const iconOpen = document.getElementById('menu-icon-open');
@@ -402,61 +438,56 @@
 
         (() => {
             const dialog = document.getElementById('pwa-install-dialog');
-            const installButton = document.getElementById('pwa-install-button');
-            const closeButtons = [document.getElementById('pwa-install-close'), document.getElementById('pwa-install-later')];
-            const help = document.getElementById('pwa-install-help');
+            const instructions = document.getElementById('pwa-install-instructions');
+            const ngrokNote = document.getElementById('pwa-ngrok-note');
+            const lanNote = document.getElementById('pwa-lan-note');
+            const closeButtons = [document.getElementById('pwa-install-close'), document.getElementById('pwa-install-cancel')];
+            const openButtons = document.querySelectorAll('[data-pwa-install-open]');
             const isStandalone = window.matchMedia('(display-mode: standalone)').matches || window.navigator.standalone === true;
-            let installPrompt = null;
-            let fallbackShown = false;
-
-            const hideDialog = () => {
+            const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent) || (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
+            const isAndroid = /Android/.test(navigator.userAgent);
+            const closeDialog = () => {
                 dialog.classList.add('hidden');
                 dialog.classList.remove('flex');
-                sessionStorage.setItem('sakatalent.install-dismissed', '1');
+                document.body.classList.remove('overflow-hidden');
             };
-            const showDialog = () => {
+            const openDialog = () => {
+                if (isIOS) {
+                    instructions.textContent = 'In Safari, tap Share, choose Add to Home Screen, then tap Add.';
+                } else if (isAndroid) {
+                    instructions.textContent = 'In Chrome, open the menu and choose Install app. If that option is unavailable, choose Add to Home screen.';
+                } else {
+                    instructions.textContent = 'In Chrome, choose the menu, then Cast, save and share, then Install page as app. You can also use the install icon at the right of the address bar when it appears.';
+                }
+                ngrokNote.classList.toggle('hidden', !window.location.hostname.includes('ngrok-free'));
+                lanNote.classList.toggle('hidden', !(window.location.hostname === '192.168.100.5' && !window.isSecureContext));
                 dialog.classList.remove('hidden');
                 dialog.classList.add('flex');
+                document.body.classList.add('overflow-hidden');
             };
 
-            window.addEventListener('beforeinstallprompt', event => {
-                event.preventDefault();
-                installPrompt = event;
-                if (!isStandalone && !sessionStorage.getItem('sakatalent.install-dismissed')) showDialog();
-            });
-
-            closeButtons.forEach(button => button.addEventListener('click', hideDialog));
-            dialog.addEventListener('click', event => { if (event.target === dialog) hideDialog(); });
-
-            installButton.addEventListener('click', async () => {
-                if (!installPrompt) {
-                    if (fallbackShown) {
-                        hideDialog();
-                        return;
-                    }
-                    fallbackShown = true;
-                    help.textContent = /iPhone|iPad|iPod/i.test(navigator.userAgent)
-                        ? 'In Safari, tap Share, then choose “Add to Home Screen”.'
-                        : 'Use your browser menu and choose “Install app” or “Add to Home screen”.';
-                    help.classList.remove('hidden');
-                    installButton.textContent = 'Got it';
-                    return;
+            openButtons.forEach(button => {
+                if (isStandalone) {
+                    button.classList.add('hidden');
+                } else {
+                    button.addEventListener('click', openDialog);
                 }
-                installPrompt.prompt();
-                const choice = await installPrompt.userChoice;
-                installPrompt = null;
-                if (choice.outcome === 'accepted') hideDialog();
+            });
+            closeButtons.forEach(button => button.addEventListener('click', closeDialog));
+            dialog.addEventListener('click', event => { if (event.target === dialog) closeDialog(); });
+            document.addEventListener('keydown', event => { if (event.key === 'Escape') closeDialog(); });
+
+            window.addEventListener('appinstalled', () => {
+                closeDialog();
+                openButtons.forEach(button => button.classList.add('hidden'));
             });
 
-            window.addEventListener('appinstalled', hideDialog);
             if ('serviceWorker' in navigator && window.isSecureContext) {
-                window.addEventListener('load', () => navigator.serviceWorker.register('/service-worker.js').catch(error => console.warn('Service worker registration failed:', error)));
-            }
-            if (!isStandalone && !sessionStorage.getItem('sakatalent.install-dismissed')) {
-                window.addEventListener('load', () => window.setTimeout(showDialog, 700), { once: true });
+                window.addEventListener('load', () => navigator.serviceWorker.register('/service-worker.js?v=3', { scope: '/' })
+                    .catch(error => console.warn('Service worker registration failed:', error)));
             }
         })();
-    </script>
+    </script>{% endcompress %}
 
     {% block extra_js %}{% endblock %}
 </body>
