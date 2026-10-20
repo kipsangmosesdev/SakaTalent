@@ -238,7 +238,10 @@ STATICFILES_FINDERS = [
 ]
 
 # Minify app HTML responses and CSS/JavaScript wrapped with {% compress %}.
-COMPRESS_ENABLED = True
+# Django Compressor writes generated files to STATIC_ROOT at request time when
+# enabled. Vercel's deployment filesystem is read-only, so use source assets
+# there and keep request-time compression enabled for local development.
+COMPRESS_ENABLED = not bool(os.environ.get('VERCEL'))
 HTML_MINIFY = True
 
 # Email
