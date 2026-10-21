@@ -133,7 +133,18 @@ WSGI_APPLICATION = 'riadhaproject.wsgi.application'
 # https://docs.djangoproject.com/en/6.1/ref/settings/#databases
 
 DATABASE_URL = os.environ.get('DATABASE_URL', '').strip()
+if not DATABASE_URL and os.environ.get('VERCEL'):
+    raise ImproperlyConfigured(
+        'DATABASE_URL must be set in the Vercel project environment. '
+        'Configure it with the Neon PostgreSQL connection string.'
+    )
+
 if DATABASE_URL:
+    if not DATABASE_URL.startswith(('postgres://', 'postgresql://')):
+        raise ImproperlyConfigured(
+            'DATABASE_URL must be a valid PostgreSQL connection URL beginning '
+            'with postgres:// or postgresql://.'
+        )
     DATABASES = {
         'default': dj_database_url.parse(
             DATABASE_URL,

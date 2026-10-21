@@ -21,7 +21,7 @@ from django.urls import path, include
 from core.pwa import manifest, pwa_asset, service_worker
 
 urlpatterns = [
-    path('admin/', admin.site.urls),
+    path('admin/labateet254/', admin.site.urls),
     path('manifest.webmanifest', manifest, name='pwa_manifest'),
     path('pwa-assets/<str:asset_name>', pwa_asset, name='pwa_asset'),
     path('service-worker.js', service_worker, name='service_worker'),
