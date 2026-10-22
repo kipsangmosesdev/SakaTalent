@@ -1,5 +1,6 @@
 from django.contrib import messages
 import json
+import logging
 import secrets
 import urllib.parse
 import urllib.request
@@ -19,6 +20,8 @@ from django.utils.crypto import get_random_string
 from django.utils import timezone
 from core.models import AthleteProfile, Event, Performance, Verification, TrainingPlan, TrainingTarget
 from .forms import SignUpForm, AthleteProfileForm, PerformanceForm, TrainingPlanForm, TrainingTargetForm, TrainingResultForm
+
+logger = logging.getLogger(__name__)
 
 def signup(request):
     if request.user.is_authenticated:
@@ -502,9 +505,10 @@ def scout_agent_ask(request):
         normalized,
     )
     if greeting_only:
-        return JsonResponse({
-            'answer': 'Hi! I’m Scout AI. I can help you find athletes by county or event, compare verified performances, or review an athlete’s results. What would you like to explore?'
-        })
+        greeting = (
+            'Hi! I’m Scout AI. I can help you find athletes by county or event, compare verified performances, or review an athlete’s results. What would you like to explore?'
+        )
+        return scout_openai_answer_or_fallback(question, greeting)
 
     records = Performance.objects.filter(
         verification__status='APPROVED'
@@ -727,13 +731,16 @@ def scout_agent_ask(request):
 
 
 def scout_openai_answer_or_fallback(question, grounded_answer):
-    """Ask OpenAI to answer from verified results; return the local answer on any failure."""
+    """Ask OpenAI to phrase a response grounded in verified scouting data."""
     from django.http import JsonResponse
-    from urllib.error import URLError
+    from urllib.error import HTTPError, URLError
 
     api_key = getattr(settings, 'OPENAI_API_KEY', '').strip()
     if not api_key:
-        return JsonResponse({'answer': grounded_answer})
+        logger.error('Scout OpenAI request skipped: OPENAI_API_KEY is not configured.')
+        return JsonResponse({
+            'error': 'Scout AI is not connected to OpenAI yet. Configure OPENAI_API_KEY on the server.'
+        }, status=503)
 
     payload = {
         'model': getattr(settings, 'OPENAI_MODEL', 'gpt-6-astra'),
@@ -773,10 +780,21 @@ def scout_openai_answer_or_fallback(question, grounded_answer):
         ).strip()
         if generated:
             return JsonResponse({'answer': generated[:1800]})
-        return JsonResponse({'answer': grounded_answer})
-    except (URLError, TimeoutError, ValueError, KeyError, TypeError):
-        # Keep Scout available if the optional AI service is unreachable or misconfigured.
-        return JsonResponse({'answer': grounded_answer})
+        logger.error('Scout OpenAI request returned no text (model=%s).', payload['model'])
+        return JsonResponse({
+            'error': 'OpenAI returned an empty response. Check the server logs and model configuration.'
+        }, status=502)
+    except HTTPError as exc:
+        detail = exc.read().decode('utf-8', errors='replace')[:1000]
+        logger.error('Scout OpenAI API returned HTTP %s (model=%s): %s', exc.code, payload['model'], detail)
+        return JsonResponse({
+            'error': f'OpenAI request failed (HTTP {exc.code}). Check OPENAI_API_KEY, billing, model access, and server logs.'
+        }, status=502)
+    except (URLError, TimeoutError, ValueError, KeyError, TypeError) as exc:
+        logger.exception('Scout OpenAI request failed (model=%s): %s', payload['model'], exc)
+        return JsonResponse({
+            'error': 'Scout could not get a response from OpenAI. Check the server logs and try again.'
+        }, status=502)
 
 
 def remember_scout_athletes(request, athlete_ids):
