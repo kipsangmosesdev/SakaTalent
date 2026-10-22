@@ -81,19 +81,77 @@
         bubble.innerHTML = '<span class="typing-dots" aria-hidden="true"><span></span><span></span><span></span></span>';
         return bubble;
     };
-    const renderReply = (bubble, text) => {
-        bubble.textContent = '';
-        const boldPattern = /\*\*(.+?)\*\*/gs;
+    const appendInlineMarkdown = (parent, text) => {
+        const boldPattern = /\*\*(.+?)\*\*/g;
         let cursor = 0;
         let match;
         while ((match = boldPattern.exec(text)) !== null) {
-            bubble.appendChild(document.createTextNode(text.slice(cursor, match.index)));
+            parent.appendChild(document.createTextNode(text.slice(cursor, match.index)));
             const strong = document.createElement('strong');
+            strong.className = 'font-bold text-slate-900';
             strong.textContent = match[1];
-            bubble.appendChild(strong);
+            parent.appendChild(strong);
             cursor = boldPattern.lastIndex;
         }
-        bubble.appendChild(document.createTextNode(text.slice(cursor)));
+        parent.appendChild(document.createTextNode(text.slice(cursor)));
+    };
+    const splitTableRow = line => {
+        const trimmed = line.trim().replace(/^\|/, '').replace(/\|$/, '');
+        return trimmed.split('|').map(cell => cell.trim());
+    };
+    const isTableSeparator = line => /^\s*\|?\s*:?-{3,}:?\s*(\|\s*:?-{3,}:?\s*)+\|?\s*$/.test(line);
+    const renderMarkdownTable = (lines, start, end, parent) => {
+        const headers = splitTableRow(lines[start]);
+        const wrapper = document.createElement('div');
+        wrapper.className = 'my-2 max-w-full overflow-x-auto rounded-lg border border-slate-200';
+        const table = document.createElement('table');
+        table.className = 'w-full min-w-max border-collapse text-left text-xs sm:text-sm';
+        const thead = document.createElement('thead');
+        thead.className = 'bg-slate-100 text-slate-800';
+        const headerRow = document.createElement('tr');
+        headers.forEach(label => {
+            const th = document.createElement('th');
+            th.className = 'whitespace-nowrap border-b border-slate-200 px-3 py-2 font-bold';
+            appendInlineMarkdown(th, label);
+            headerRow.appendChild(th);
+        });
+        thead.appendChild(headerRow);
+        table.appendChild(thead);
+        const tbody = document.createElement('tbody');
+        for (let rowIndex = start + 2; rowIndex < end; rowIndex++) {
+            if (!lines[rowIndex].includes('|')) continue;
+            const values = splitTableRow(lines[rowIndex]);
+            const tr = document.createElement('tr');
+            tr.className = 'odd:bg-white even:bg-slate-50';
+            headers.forEach((_, columnIndex) => {
+                const td = document.createElement('td');
+                td.className = 'whitespace-nowrap border-b border-slate-100 px-3 py-2';
+                appendInlineMarkdown(td, values[columnIndex] || '');
+                tr.appendChild(td);
+            });
+            tbody.appendChild(tr);
+        }
+        table.appendChild(tbody);
+        wrapper.appendChild(table);
+        parent.appendChild(wrapper);
+    };
+    const renderReply = (bubble, text) => {
+        bubble.textContent = '';
+        const lines = text.split(/\r?\n/);
+        let lineIndex = 0;
+        while (lineIndex < lines.length) {
+            if (lineIndex + 1 < lines.length && lines[lineIndex].includes('|') && isTableSeparator(lines[lineIndex + 1])) {
+                let tableEnd = lineIndex + 2;
+                while (tableEnd < lines.length && lines[tableEnd].includes('|') && lines[tableEnd].trim()) tableEnd++;
+                renderMarkdownTable(lines, lineIndex, tableEnd, bubble);
+                lineIndex = tableEnd;
+                if (lineIndex < lines.length && lines[lineIndex].trim()) bubble.appendChild(document.createElement('br'));
+                continue;
+            }
+            appendInlineMarkdown(bubble, lines[lineIndex]);
+            lineIndex++;
+            if (lineIndex < lines.length) bubble.appendChild(document.createElement('br'));
+        }
     };
     const revealReply = (bubble, text) => new Promise(resolve => {
         bubble.removeAttribute('aria-label');
