@@ -493,6 +493,19 @@ def scout_agent_ask(request):
     if not question or len(question) > 500:
         return JsonResponse({'error': 'Enter a question of up to 500 characters.'}, status=400)
 
+    # Handle greeting-only messages before the default ranking path. Otherwise
+    # an unfiltered message such as "hello" is treated as a request for top athletes.
+    normalized = question.casefold().strip()
+    greeting_only = re.fullmatch(
+        r"[\W_]*(?:hi|hello|hey|howdy|good\s+(?:morning|afternoon|evening))"
+        r"[\W_]*(?:there|scout|saka)?[\W_]*",
+        normalized,
+    )
+    if greeting_only:
+        return JsonResponse({
+            'answer': 'Hi! I’m Scout AI. I can help you find athletes by county or event, compare verified performances, or review an athlete’s results. What would you like to explore?'
+        })
+
     records = Performance.objects.filter(
         verification__status='APPROVED'
     ).select_related('athlete__user', 'event').order_by('result', '-competition_date')
@@ -500,7 +513,6 @@ def scout_agent_ask(request):
         answer = 'There are no verified race results to explore yet. Check back when athlete performances have been approved.'
         return scout_openai_answer_or_fallback(question, answer)
 
-    normalized = question.casefold()
     county_choices = list(AthleteProfile.COUNTY_CHOICES)
     county_match = next((
         (code, label) for code, label in AthleteProfile.COUNTY_CHOICES
