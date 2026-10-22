@@ -801,6 +801,7 @@ def talent_discovery(request):
     # Retrieve unique counties, excluding empty or null values
     counties = (
         AthleteProfile.objects.filter(
+            is_verified=True,
             performances__verification__status='APPROVED'
         )
         .exclude(county__isnull=True)
@@ -823,7 +824,7 @@ def talent_discovery(request):
 
         for ranking in rankings:
             athlete = ranking.get('athlete')
-            if not athlete:
+            if not athlete or not athlete.is_verified:
                 continue
 
             # Filter by search term (name, username, or string representation)
