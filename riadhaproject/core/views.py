@@ -724,7 +724,7 @@ def scout_openai_answer_or_fallback(question, grounded_answer):
         return JsonResponse({'answer': grounded_answer})
 
     payload = {
-        'model': getattr(settings, 'OPENAI_MODEL', 'gpt-4o-mini'),
+        'model': getattr(settings, 'OPENAI_MODEL', 'gpt-6-astra'),
         'instructions': (
             'You are Scout AI, SakaTalent’s athletics scouting assistant. Answer the user’s '
             'question using only the verified-data result supplied below. Never invent athlete '
