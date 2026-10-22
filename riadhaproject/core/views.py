@@ -481,7 +481,7 @@ def scout_agent(request):
 
 
 def scout_agent_ask(request):
-    """Answer scout questions using approved athlete performance records."""
+    """Generate Scout answers with OpenAI, grounded in verified results and backed by local logic."""
     from django.http import JsonResponse
 
     if request.method != 'POST':
@@ -497,7 +497,8 @@ def scout_agent_ask(request):
         verification__status='APPROVED'
     ).select_related('athlete__user', 'event').order_by('result', '-competition_date')
     if not records.exists():
-        return JsonResponse({'answer': 'There are no verified race results to explore yet. Check back when athlete performances have been approved.'})
+        answer = 'There are no verified race results to explore yet. Check back when athlete performances have been approved.'
+        return scout_openai_answer_or_fallback(question, answer)
 
     normalized = question.casefold()
     county_choices = list(AthleteProfile.COUNTY_CHOICES)
@@ -577,9 +578,8 @@ def scout_agent_ask(request):
                 pk__in=previous_athlete_ids
             ).select_related('user')
             names = ', '.join(str(athlete) for athlete in previous_athletes[:8])
-            return JsonResponse({
-                'answer': f'Which athlete do you mean? The last results included {names}. Ask about one by name.'
-            })
+            answer = f'Which athlete do you mean? The last results included {names}. Ask about one by name.'
+            return scout_openai_answer_or_fallback(question, answer)
     if athlete_match:
         scoped = scoped.filter(athlete=athlete_match)
 
@@ -615,7 +615,7 @@ def scout_agent_ask(request):
                 answer += f' under {age_limit}'
             answer += '.'
         remember_scout_athletes(request, [athlete.pk for athlete in athletes])
-        return JsonResponse({'answer': answer})
+        return scout_openai_answer_or_fallback(question, answer)
 
     age_list_question = age_limit is not None and 'athlet' in normalized and not any(
         term in normalized for term in ('top', 'fastest', 'best', 'rank')
@@ -641,7 +641,7 @@ def scout_agent_ask(request):
         else:
             answer = f'I could not find verified athletes {qualifier}.'
         remember_scout_athletes(request, [athlete.pk for athlete in athletes])
-        return JsonResponse({'answer': answer})
+        return scout_openai_answer_or_fallback(question, answer)
 
     context_athlete_ids = []
     if race_query or any(term in normalized for term in race_terms):
@@ -711,7 +711,59 @@ def scout_agent_ask(request):
                 answer += ' Include a county or event name to narrow the search.'
 
     remember_scout_athletes(request, context_athlete_ids)
-    return JsonResponse({'answer': answer})
+    return scout_openai_answer_or_fallback(question, answer)
+
+
+def scout_openai_answer_or_fallback(question, grounded_answer):
+    """Ask OpenAI to answer from verified results; return the local answer on any failure."""
+    from django.http import JsonResponse
+    from urllib.error import URLError
+
+    api_key = getattr(settings, 'OPENAI_API_KEY', '').strip()
+    if not api_key:
+        return JsonResponse({'answer': grounded_answer})
+
+    payload = {
+        'model': getattr(settings, 'OPENAI_MODEL', 'gpt-4o-mini'),
+        'instructions': (
+            'You are Scout AI, SakaTalent’s athletics scouting assistant. Answer the user’s '
+            'question using only the verified-data result supplied below. Never invent athlete '
+            'facts, results, rankings, or explanations. If the supplied result does not answer '
+            'the question, say what verified information is available and ask one useful '
+            'follow-up. Explain that lower times are faster when relevant. Keep the answer '
+            'concise and conversational; do not repeat the question.'
+        ),
+        'input': json.dumps({
+            'user_question': question,
+            'verified_data_result': grounded_answer,
+        }),
+        'max_output_tokens': 220,
+    }
+    request_data = urllib.request.Request(
+        'https://api.openai.com/v1/responses',
+        data=json.dumps(payload).encode('utf-8'),
+        headers={
+            'Authorization': f'Bearer {api_key}',
+            'Content-Type': 'application/json',
+        },
+        method='POST',
+    )
+    try:
+        with urllib.request.urlopen(request_data, timeout=12) as response:
+            result = json.loads(response.read().decode('utf-8'))
+        generated = ' '.join(
+            part.get('text', '').strip()
+            for item in result.get('output', [])
+            if item.get('type') == 'message'
+            for part in item.get('content', [])
+            if part.get('type') == 'output_text' and part.get('text', '').strip()
+        ).strip()
+        if generated:
+            return JsonResponse({'answer': generated[:1800]})
+        return JsonResponse({'answer': grounded_answer})
+    except (URLError, TimeoutError, ValueError, KeyError, TypeError):
+        # Keep Scout available if the optional AI service is unreachable or misconfigured.
+        return JsonResponse({'answer': grounded_answer})
 
 
 def remember_scout_athletes(request, athlete_ids):

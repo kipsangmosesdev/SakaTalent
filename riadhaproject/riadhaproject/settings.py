@@ -71,6 +71,10 @@ CSRF_TRUSTED_ORIGINS = [
     ).split(',')
     if origin.strip()
 ]
+
+# Optional language model used to explain verified Scout AI results.
+OPENAI_API_KEY = os.environ.get('OPENAI_API_KEY', '').strip()
+OPENAI_MODEL = os.environ.get('OPENAI_MODEL', 'gpt-4o-mini').strip()
 for vercel_host in (
     os.environ.get('VERCEL_URL', ''),
     os.environ.get('VERCEL_PROJECT_PRODUCTION_URL', ''),

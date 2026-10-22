@@ -268,12 +268,6 @@
 
                 </nav>
 
-                <div class="hidden md:flex">
-                    <button type="button" data-pwa-install-open class="items-center rounded-lg border border-energy/50 px-3 py-2 text-[11px] font-extrabold uppercase tracking-wider text-orange-100 transition hover:bg-energy/15 hover:border-energy">
-                        Install app
-                    </button>
-                </div>
-
                 <!-- Auth Status & Profile Actions -->
                 <div class="hidden md:flex items-center pl-3 lg:pl-4 border-l border-white/10">
                     {% if user.is_authenticated %}
@@ -345,10 +339,6 @@
             <a href="{% url 'talent_discovery' %}" {% if request.resolver_match.url_name == 'talent_discovery' %}aria-current="page"{% endif %} class="block px-4 py-3 rounded-xl text-sm font-bold uppercase tracking-wider text-slate-200 hover:bg-stadium-800">
                 Discover Talent
             </a>
-            <button type="button" data-pwa-install-open class="w-full text-left px-4 py-3 rounded-xl text-sm font-bold uppercase tracking-wider text-orange-200 hover:bg-stadium-800">
-                Install SakaTalent
-            </button>
-
             <div class="pt-4 mt-3 border-t border-white/10">
                 {% if user.is_authenticated %}
                     <form method="POST" action="{% url 'logout' %}">
