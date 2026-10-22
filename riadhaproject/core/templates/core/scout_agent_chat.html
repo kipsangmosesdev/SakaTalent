@@ -81,6 +81,20 @@
         bubble.innerHTML = '<span class="typing-dots" aria-hidden="true"><span></span><span></span><span></span></span>';
         return bubble;
     };
+    const renderReply = (bubble, text) => {
+        bubble.textContent = '';
+        const boldPattern = /\*\*(.+?)\*\*/gs;
+        let cursor = 0;
+        let match;
+        while ((match = boldPattern.exec(text)) !== null) {
+            bubble.appendChild(document.createTextNode(text.slice(cursor, match.index)));
+            const strong = document.createElement('strong');
+            strong.textContent = match[1];
+            bubble.appendChild(strong);
+            cursor = boldPattern.lastIndex;
+        }
+        bubble.appendChild(document.createTextNode(text.slice(cursor)));
+    };
     const revealReply = (bubble, text) => new Promise(resolve => {
         bubble.removeAttribute('aria-label');
         bubble.textContent = '';
@@ -88,13 +102,16 @@
         const wordCount = words.filter(part => !/^\s+$/.test(part)).length;
         const delay = Math.max(22, Math.min(52, 2200 / Math.max(wordCount, 1)));
         if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
-            bubble.textContent = text;
+            renderReply(bubble, text);
             resolve();
             return;
         }
         let index = 0;
         const typeNext = () => {
-            if (index >= words.length) return resolve();
+            if (index >= words.length) {
+                renderReply(bubble, text);
+                return resolve();
+            }
             bubble.appendChild(document.createTextNode(words[index++]));
             messages.scrollTop = messages.scrollHeight;
             window.setTimeout(typeNext, delay);
