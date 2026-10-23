@@ -251,6 +251,7 @@ def dashboard(request):
                 'best': ranking['best'],
                 'races': ranking['races'],
                 'position': ranking['position'],
+                'provisional_position': ranking['provisional_position'],
                 'fully_ranked': ranking['fully_ranked'],
             }
             (provisional_rankings if ranking['is_provisional'] else rankings).append(row)
@@ -820,11 +821,11 @@ def scout_agent_ask(request):
             else:
                 answer = f'No athletes meet the {MAIN_RANKING_MIN_RACES}-approved-race minimum for the main ranking.'
             if provisional_ranked:
-                answer += ' Provisional (1 approved race): ' + '; '.join(
-                    f'{item["athlete"]} — {item["event"].name}, average '
+                answer += ' Provisional rankings (1 approved race): ' + '; '.join(
+                    f'{i}. {item["athlete"]} — {item["event"].name}, average '
                     f'{format_agent_time(item["average"])}, best {format_agent_time(item["best"])} '
                     '(1 approved race)'
-                    for item in provisional_ranked[:limit]
+                    for i, item in enumerate(provisional_ranked[:limit], 1)
                 ) + '.'
             if not athlete_match and not event_match and not county_match:
                 answer += ' Include a county or event name to narrow the search.'
@@ -1019,6 +1020,8 @@ def talent_discovery(request):
         # Recalculate main positions after filters; provisional athletes have no main rank.
         for position, ranking in enumerate(main_rankings, start=1):
             ranking['position'] = position
+        for position, ranking in enumerate(provisional_rankings, start=1):
+            ranking['provisional_position'] = position
 
         if main_rankings:
             talent_by_event.append({

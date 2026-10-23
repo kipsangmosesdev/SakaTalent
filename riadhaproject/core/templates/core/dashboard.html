@@ -175,10 +175,10 @@
             </div>
             <div class="overflow-x-auto">
                 <table class="min-w-full divide-y divide-slate-200 text-left text-sm">
-                    <thead class="bg-slate-50 text-xs uppercase tracking-wider text-slate-600"><tr><th class="px-5 py-3">Event</th><th class="px-5 py-3">Status</th><th class="px-5 py-3">Average</th><th class="px-5 py-3">Best</th><th class="px-5 py-3 text-center">Approved races</th></tr></thead>
+                    <thead class="bg-slate-50 text-xs uppercase tracking-wider text-slate-600"><tr><th class="px-5 py-3">Event</th><th class="px-5 py-3">Provisional rank</th><th class="px-5 py-3">Average</th><th class="px-5 py-3">Best</th><th class="px-5 py-3 text-center">Approved races</th></tr></thead>
                     <tbody class="divide-y divide-slate-100">
                         {% for ranking in provisional_rankings %}
-                        <tr><td class="px-5 py-3 font-bold text-slate-900">{{ ranking.event.name }}</td><td class="px-5 py-3"><span class="rounded-full bg-amber-100 px-2.5 py-1 text-xs font-bold text-amber-900">Provisional</span></td><td class="px-5 py-3">{{ ranking.average|format_seconds }}</td><td class="px-5 py-3 font-extrabold text-blue-600">{{ ranking.best|format_seconds }}</td><td class="px-5 py-3 text-center">{{ ranking.races }}</td></tr>
+                        <tr><td class="px-5 py-3 font-bold text-slate-900">{{ ranking.event.name }}</td><td class="px-5 py-3"><span class="rounded-full bg-amber-100 px-2.5 py-1 text-xs font-bold text-amber-900">#{{ ranking.provisional_position }} · Provisional</span></td><td class="px-5 py-3">{{ ranking.average|format_seconds }}</td><td class="px-5 py-3 font-extrabold text-blue-600">{{ ranking.best|format_seconds }}</td><td class="px-5 py-3 text-center">{{ ranking.races }}</td></tr>
                         {% endfor %}
                     </tbody>
                 </table>
