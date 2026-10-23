@@ -22,7 +22,7 @@ Talent Discovery - TalentRise
                     Talent Discovery
                 </h1>
                 <p class="text-slate-500 text-sm mt-1 max-w-2xl leading-relaxed">
-                    Discover verified athletics talent from across Kenya. Rankings are calculated using verified performances only.
+                    Discover verified athletics talent from across Kenya. Main rankings need at least 2 approved races per event; athletes with 1 race appear separately as provisional. 3 or more races earns Fully ranked status.
                 </p>
                 <p class="mt-3 inline-flex items-center gap-2 rounded-lg border border-blue-100 bg-blue-50 px-3 py-2 text-xs font-medium text-blue-800">
                     Select <strong>View athlete profile</strong> under a name to explore profile details and performance history.
@@ -229,6 +229,7 @@ Talent Discovery - TalentRise
                                                 <span class="font-bold text-slate-900 text-base transition-colors group-hover:text-orange-700">
                                                     {{ ranking.athlete }}
                                                 </span>
+                                                {% if ranking.fully_ranked %}<span class="rounded-full bg-emerald-100 px-2 py-1 text-[10px] font-extrabold uppercase tracking-wide text-emerald-800">Fully ranked</span>{% endif %}
                                                 <span class="inline-flex items-center gap-1 text-[11px] font-bold uppercase tracking-wide text-orange-600 group-hover:text-orange-700">
                                                     View athlete profile
                                                     <svg class="h-3.5 w-3.5 transition-transform group-hover:translate-x-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
@@ -272,7 +273,40 @@ Talent Discovery - TalentRise
                 </div>
             {% endfor %}
         </div>
-    {% else %}
+    {% endif %}
+
+    {% if provisional_by_event %}
+        <section class="mt-8 space-y-4" aria-labelledby="provisional-rankings-heading">
+            <div>
+                <h2 id="provisional-rankings-heading" class="font-heading text-2xl font-extrabold uppercase text-slate-900">Provisional rankings</h2>
+                <p class="mt-1 text-sm text-slate-500">Athletes with one approved race are shown separately until they have at least two approved races in an event.</p>
+            </div>
+            {% for event_data in provisional_by_event %}
+            <div class="overflow-hidden rounded-2xl border border-amber-200 bg-white shadow-sm">
+                <div class="bg-amber-50 px-5 py-3"><h3 class="font-heading font-extrabold uppercase text-amber-950">{{ event_data.event.name }}</h3></div>
+                <div class="overflow-x-auto">
+                    <table class="min-w-full divide-y divide-slate-200 text-left text-sm">
+                        <thead class="bg-slate-50 text-xs uppercase tracking-wider text-slate-600"><tr><th class="px-5 py-3">Status</th><th class="px-5 py-3">Athlete</th><th class="px-5 py-3">Average</th><th class="px-5 py-3">Best result</th><th class="px-5 py-3">Home county</th><th class="px-5 py-3 text-center">Approved races</th></tr></thead>
+                        <tbody class="divide-y divide-slate-100">
+                            {% for ranking in event_data.rankings %}
+                            <tr>
+                                <td class="px-5 py-3"><span class="rounded-full bg-amber-100 px-2.5 py-1 text-xs font-bold text-amber-900">Provisional</span></td>
+                                <td class="px-5 py-3 font-bold text-slate-900">{{ ranking.athlete }}</td>
+                                <td class="px-5 py-3">{{ ranking.average|format_seconds }}</td>
+                                <td class="px-5 py-3 font-extrabold text-blue-600">{{ ranking.best|format_seconds }}</td>
+                                <td class="px-5 py-3">{{ ranking.athlete.get_county_display }}</td>
+                                <td class="px-5 py-3 text-center">{{ ranking.races }}</td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+            {% endfor %}
+        </section>
+    {% endif %}
+
+    {% if not talent_by_event and not provisional_by_event %}
         <!-- Empty State -->
         <div class="bg-white rounded-2xl border border-slate-200 p-8 sm:p-12 text-center max-w-lg mx-auto space-y-4 shadow-sm my-6 sm:my-8">
             <div class="w-12 h-12 rounded-full bg-slate-100 text-slate-400 flex items-center justify-center mx-auto">

@@ -87,7 +87,7 @@
                     National · All counties
                 </span>
                 <span class="rounded-full border border-slate-200 bg-white px-3 py-1.5 text-slate-600">Verified results only</span>
-                <span class="text-slate-500 font-semibold normal-case tracking-normal">Ranked by average time; lower is faster.</span>
+                <span class="text-slate-500 font-semibold normal-case tracking-normal">Main ranking needs 2 approved races; 3+ is Fully ranked. Lower average time is faster.</span>
             </div>
         </div>
 
@@ -115,6 +115,7 @@
                                 <div class="font-bold text-slate-900 text-base">
                                     {{ ranking.event.name }}
                                 </div>
+                                {% if ranking.fully_ranked %}<span class="mt-1 inline-flex rounded-full bg-emerald-100 px-2 py-1 text-[10px] font-extrabold uppercase tracking-wide text-emerald-800">Fully ranked</span>{% endif %}
                             </td>
 
                             <!-- Rank Badge -->
@@ -164,7 +165,28 @@
             </div>
         </div>
 
-        {% else %}
+        {% endif %}
+
+        {% if provisional_rankings %}
+        <section class="mt-6 overflow-hidden rounded-2xl border border-amber-200 bg-white shadow-sm" aria-labelledby="dashboard-provisional-heading">
+            <div class="border-b border-amber-100 bg-amber-50 px-5 py-4">
+                <h3 id="dashboard-provisional-heading" class="font-heading text-lg font-extrabold uppercase text-amber-950">Provisional rankings</h3>
+                <p class="mt-1 text-xs text-amber-900">One approved race so far. Two are needed for the main ranking.</p>
+            </div>
+            <div class="overflow-x-auto">
+                <table class="min-w-full divide-y divide-slate-200 text-left text-sm">
+                    <thead class="bg-slate-50 text-xs uppercase tracking-wider text-slate-600"><tr><th class="px-5 py-3">Event</th><th class="px-5 py-3">Status</th><th class="px-5 py-3">Average</th><th class="px-5 py-3">Best</th><th class="px-5 py-3 text-center">Approved races</th></tr></thead>
+                    <tbody class="divide-y divide-slate-100">
+                        {% for ranking in provisional_rankings %}
+                        <tr><td class="px-5 py-3 font-bold text-slate-900">{{ ranking.event.name }}</td><td class="px-5 py-3"><span class="rounded-full bg-amber-100 px-2.5 py-1 text-xs font-bold text-amber-900">Provisional</span></td><td class="px-5 py-3">{{ ranking.average|format_seconds }}</td><td class="px-5 py-3 font-extrabold text-blue-600">{{ ranking.best|format_seconds }}</td><td class="px-5 py-3 text-center">{{ ranking.races }}</td></tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </section>
+        {% endif %}
+
+        {% if not rankings and not provisional_rankings %}
 
         <!-- Empty State Container -->
         <div class="bg-white rounded-xl border border-slate-200 p-8 sm:p-12 text-center max-w-lg mx-auto space-y-4 shadow-sm">

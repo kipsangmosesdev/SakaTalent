@@ -21,7 +21,7 @@
                 {{ event.name }} Rankings
             </h1>
             <p class="text-slate-500 text-sm mt-1">
-                Rankings are based on verified performances only.
+                Main rankings require at least 2 approved races in this event; lower average time is faster. 3 or more races earns Fully ranked status.
             </p>
         </div>
 
@@ -31,6 +31,12 @@
             </a>
         </div>
     </div>
+
+    {% if not rankings and provisional_rankings %}
+        <div class="rounded-xl border border-amber-200 bg-amber-50 px-4 py-3 text-sm text-amber-900">
+            No athlete has the 2 approved races needed for the main ranking yet. One-race athletes appear below as provisional.
+        </div>
+    {% endif %}
 
     {% if rankings %}
 
@@ -74,8 +80,9 @@
 
                         <!-- Athlete Name -->
                         <td class="px-6 py-4 whitespace-nowrap" data-label="Athlete" data-card-span="2">
-                            <div class="font-bold text-slate-900 text-base">
-                                {{ ranking.athlete }}
+                            <div class="flex flex-wrap items-center gap-2">
+                                <span class="font-bold text-slate-900 text-base">{{ ranking.athlete }}</span>
+                                {% if ranking.fully_ranked %}<span class="rounded-full bg-emerald-100 px-2 py-1 text-[10px] font-extrabold uppercase tracking-wide text-emerald-800">Fully ranked</span>{% endif %}
                             </div>
                         </td>
 
@@ -105,7 +112,36 @@
         </div>
     </div>
 
-    {% else %}
+    {% endif %}
+
+    {% if provisional_rankings %}
+    <section class="space-y-3" aria-labelledby="provisional-heading">
+        <div>
+            <h2 id="provisional-heading" class="font-heading text-xl font-extrabold uppercase text-slate-900">Provisional rankings</h2>
+            <p class="mt-1 text-sm text-slate-500">These athletes have one approved race. Their average, best time, and race count are shown, but they are not included in the main ranking until they have two approved races.</p>
+        </div>
+        <div class="overflow-x-auto rounded-xl border border-amber-200 bg-white shadow-sm">
+            <table class="min-w-full divide-y divide-slate-200 text-left text-sm">
+                <thead class="bg-amber-50 text-xs uppercase tracking-wider text-amber-900"><tr>
+                    <th class="px-6 py-3 font-bold">Status</th><th class="px-6 py-3 font-bold">Athlete</th><th class="px-6 py-3 font-bold">Average</th><th class="px-6 py-3 font-bold">Best result</th><th class="px-6 py-3 text-center font-bold">Approved races</th>
+                </tr></thead>
+                <tbody class="divide-y divide-slate-100">
+                    {% for ranking in provisional_rankings %}
+                    <tr>
+                        <td class="px-6 py-4"><span class="rounded-full bg-amber-100 px-2.5 py-1 text-xs font-bold text-amber-900">Provisional</span></td>
+                        <td class="px-6 py-4 font-bold text-slate-900">{{ ranking.athlete }}</td>
+                        <td class="px-6 py-4">{{ ranking.average|format_seconds }}</td>
+                        <td class="px-6 py-4 font-extrabold text-blue-600">{{ ranking.best|format_seconds }}</td>
+                        <td class="px-6 py-4 text-center">{{ ranking.races }}</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </section>
+    {% endif %}
+
+    {% if not rankings and not provisional_rankings %}
 
     <!-- Empty State Container -->
     <div class="bg-white rounded-xl border border-slate-200 p-8 sm:p-12 text-center max-w-lg mx-auto space-y-4 shadow-sm">
