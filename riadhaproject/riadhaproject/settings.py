@@ -75,7 +75,15 @@ CSRF_TRUSTED_ORIGINS = [
 # Optional language model used to explain verified Scout AI results.
 OPENAI_API_KEY = os.environ.get('OPENAI_API_KEY', '').strip()
 OPENAI_MODEL = os.environ.get('OPENAI_MODEL', 'gpt-6-astra').strip()
-SAKATALENT_DEVELOPER = os.environ.get('SAKATALENT_DEVELOPER', 'Moses Kipsang').strip()
+SAKATALENT_DEVELOPER = os.environ.get(
+    'SAKATALENT_DEVELOPER', 'Moses Kipsang (KITI ICT Department team contributor)'
+).strip()
+SAKATALENT_DEVELOPER_PROFILE_URL = os.environ.get(
+    'SAKATALENT_DEVELOPER_PROFILE_URL', 'https://moseskipsang.vercel.app/'
+).strip()
+SAKATALENT_KNOWLEDGE_FILE = os.environ.get(
+    'SAKATALENT_KNOWLEDGE_FILE', str(BASE_DIR / 'SAKATALENT_KNOWLEDGE.txt')
+).strip()
 for vercel_host in (
     os.environ.get('VERCEL_URL', ''),
     os.environ.get('VERCEL_PROJECT_PRODUCTION_URL', ''),

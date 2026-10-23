@@ -3,6 +3,9 @@
 .env.*
 !.env.example
 
+# Private SakaTalent reference notes (loaded locally by Scout AI)
+/SAKATALENT_KNOWLEDGE.txt
+
 # Python
 __pycache__/
 *.py[cod]
