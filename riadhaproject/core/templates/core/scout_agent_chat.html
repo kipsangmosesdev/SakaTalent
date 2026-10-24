@@ -34,27 +34,37 @@
     </header>
     <div id="chat-messages" class="scout-chat-messages flex min-h-0 flex-1 flex-col gap-4 overflow-x-hidden overflow-y-auto bg-gradient-to-b from-slate-50 to-white p-3.5 sm:gap-5 sm:p-7 lg:p-8" role="log" aria-label="Conversation with Scout AI" aria-live="polite" aria-relevant="additions text">
         {% if not scout_chat_history %}
-        <div class="max-w-[98%] self-start rounded-2xl rounded-tl-sm border border-slate-200 bg-white px-4 py-4 text-[13px] leading-5 text-slate-700 shadow-sm sm:max-w-[88%] sm:px-5 sm:py-4 sm:text-sm sm:leading-6">
-            <p class="font-semibold text-slate-900">Hi, I’m Scout AI.</p>
-            <p class="mt-1">I can compare approved performances, find athletes by county or event, review an athlete’s results, and explore race results. Choose a prompt or ask your own question.</p>
-            <p class="mt-4 text-[10px] font-bold uppercase tracking-[.16em] text-slate-400 sm:text-[11px]">Try asking</p>
-            <div class="mt-2.5 flex gap-2 overflow-x-auto pb-1 sm:flex-wrap sm:overflow-visible">
-                <button type="button" class="suggestion shrink-0 rounded-xl border border-orange-100 bg-orange-50 px-3 py-2.5 text-left text-[11px] font-semibold leading-4 text-orange-900 transition hover:border-orange-300 hover:bg-orange-100 focus:outline-none focus:ring-2 focus:ring-orange-400 sm:py-2 sm:text-xs">Who are the fastest in Nandi for 5000m?</button>
-                <button type="button" class="suggestion shrink-0 rounded-xl border border-slate-200 bg-white px-3 py-2.5 text-left text-[11px] font-semibold leading-4 text-slate-700 transition hover:border-orange-200 hover:bg-orange-50 focus:outline-none focus:ring-2 focus:ring-orange-400 sm:py-2 sm:text-xs">Are there athletes from Garissa?</button>
-                <button type="button" class="suggestion shrink-0 rounded-xl border border-slate-200 bg-white px-3 py-2.5 text-left text-[11px] font-semibold leading-4 text-slate-700 transition hover:border-orange-200 hover:bg-orange-50 focus:outline-none focus:ring-2 focus:ring-orange-400 sm:py-2 sm:text-xs">List athletes under 20</button>
-                <button type="button" class="suggestion shrink-0 rounded-xl border border-slate-200 bg-white px-3 py-2.5 text-left text-[11px] font-semibold leading-4 text-slate-700 transition hover:border-orange-200 hover:bg-orange-50 focus:outline-none focus:ring-2 focus:ring-orange-400 sm:py-2 sm:text-xs">List only top ladies in Bomet county</button>
+        <div class="flex max-w-full items-start gap-2.5 self-start sm:gap-3">
+            <span class="flex h-8 w-8 shrink-0 items-center justify-center rounded-xl bg-orange-500 text-white shadow-sm sm:h-9 sm:w-9" aria-hidden="true">
+                <svg class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8" d="M12 3l1.8 5.2L19 10l-5.2 1.8L12 17l-1.8-5.2L5 10l5.2-1.8L12 3zm6 11l1.2 2.8L22 18l-2.8 1.2L18 22l-1.2-2.8L14 18l2.8-1.2L18 14z"/></svg>
+            </span>
+            <div class="min-w-0 max-w-[calc(100%_-_2.75rem)] rounded-2xl rounded-tl-sm border border-slate-200 bg-white px-4 py-4 text-[13px] leading-5 text-slate-700 shadow-sm sm:max-w-[88%] sm:px-5 sm:py-4 sm:text-sm sm:leading-6">
+                <p class="font-semibold text-slate-900">Hi, I’m Scout AI.</p>
+                <p class="mt-1">I can compare approved performances, find athletes by county or event, review an athlete’s results, and explore race results. Choose a prompt or ask your own question.</p>
+                <p class="mt-4 text-[10px] font-bold uppercase tracking-[.16em] text-slate-400 sm:text-[11px]">Try asking</p>
+                <div class="mt-2.5 flex gap-2 overflow-x-auto pb-1 sm:flex-wrap sm:overflow-visible">
+                    <button type="button" class="suggestion shrink-0 rounded-xl border border-orange-100 bg-orange-50 px-3 py-2.5 text-left text-[11px] font-semibold leading-4 text-orange-900 transition hover:border-orange-300 hover:bg-orange-100 focus:outline-none focus:ring-2 focus:ring-orange-400 sm:py-2 sm:text-xs">Who are the fastest in Nandi for 5000m?</button>
+                    <button type="button" class="suggestion shrink-0 rounded-xl border border-slate-200 bg-white px-3 py-2.5 text-left text-[11px] font-semibold leading-4 text-slate-700 transition hover:border-orange-200 hover:bg-orange-50 focus:outline-none focus:ring-2 focus:ring-orange-400 sm:py-2 sm:text-xs">Are there athletes from Garissa?</button>
+                    <button type="button" class="suggestion shrink-0 rounded-xl border border-slate-200 bg-white px-3 py-2.5 text-left text-[11px] font-semibold leading-4 text-slate-700 transition hover:border-orange-200 hover:bg-orange-50 focus:outline-none focus:ring-2 focus:ring-orange-400 sm:py-2 sm:text-xs">List athletes under 20</button>
+                    <button type="button" class="suggestion shrink-0 rounded-xl border border-slate-200 bg-white px-3 py-2.5 text-left text-[11px] font-semibold leading-4 text-slate-700 transition hover:border-orange-200 hover:bg-orange-50 focus:outline-none focus:ring-2 focus:ring-orange-400 sm:py-2 sm:text-xs">List only top ladies in Bomet county</button>
+                </div>
             </div>
         </div>
         {% endif %}
     </div>
-    <form id="chat-form" class="shrink-0 border-t border-slate-200 bg-white p-3.5 sm:px-6 sm:py-4">
+    <form id="chat-form" class="shrink-0 border-t border-slate-200 bg-white p-3 sm:px-5 sm:py-4">
         {% csrf_token %}
-        <label for="chat-question" class="mb-2 block text-[10px] font-bold uppercase tracking-wider text-slate-500 sm:text-xs">Message Scout AI</label>
-        <div class="flex items-end gap-2 sm:gap-3">
-            <textarea id="chat-question" rows="1" maxlength="500" required placeholder="Ask about an athlete, county, event, or race…" class="min-h-[48px] min-w-0 flex-1 resize-none rounded-xl border border-slate-300 bg-slate-50 px-3 py-3 text-sm leading-5 transition placeholder:text-slate-400 focus:border-orange-500 focus:bg-white focus:outline-none focus:ring-2 focus:ring-orange-100 sm:min-h-[52px] sm:px-4"></textarea>
-            <button id="chat-submit" type="submit" class="inline-flex h-12 shrink-0 items-center justify-center gap-2 rounded-xl bg-orange-500 px-4 text-xs font-extrabold uppercase tracking-wide text-white shadow-sm transition hover:bg-orange-600 focus:outline-none focus:ring-2 focus:ring-orange-300 focus:ring-offset-2 disabled:cursor-wait disabled:opacity-60 sm:h-[52px] sm:px-5 sm:text-sm"><span class="hidden sm:inline">Send</span><span class="sm:hidden">Ask</span><svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 12h14m-7-7l7 7-7 7"/></svg></button>
+        <label for="chat-question" class="sr-only">Message Scout AI</label>
+        <div class="flex items-end gap-2 rounded-2xl border border-slate-200 bg-slate-50 p-1.5 shadow-sm transition focus-within:border-orange-300 focus-within:bg-white focus-within:ring-2 focus-within:ring-orange-100 sm:gap-3 sm:rounded-3xl sm:p-2">
+            <textarea id="chat-question" rows="1" maxlength="500" required placeholder="Ask Scout anything about SakaTalent…" class="max-h-36 min-h-11 min-w-0 flex-1 resize-none border-0 bg-transparent px-3 py-3 text-sm leading-5 text-slate-800 outline-none placeholder:text-slate-400 focus:border-0 focus:bg-transparent focus:outline-none focus:ring-0 sm:px-4" aria-describedby="chat-input-hint"></textarea>
+            <button id="chat-submit" type="submit" aria-label="Send message" title="Send message" class="inline-flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-orange-500 text-white shadow-sm transition hover:bg-orange-600 focus:outline-none focus:ring-2 focus:ring-orange-400 focus:ring-offset-2 disabled:cursor-wait disabled:opacity-50 sm:h-12 sm:w-12 sm:rounded-2xl">
+                <svg class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 12h14m-7-7l7 7-7 7"/></svg>
+            </button>
         </div>
-        <p class="mt-2 text-[10px] leading-4 text-slate-400 sm:text-xs">Scout uses approved race results. Lower race times are faster.</p>
+        <div id="chat-input-hint" class="mt-2 flex flex-wrap items-center justify-between gap-x-3 gap-y-1 px-1 text-[10px] leading-4 text-slate-400 sm:text-xs">
+            <span>Enter to send <span class="text-slate-300">·</span> Shift + Enter for a new line</span>
+            <span>Scout uses approved race results</span>
+        </div>
     </form>
 </section>
 <div class="scout-chat-backlink mx-auto mt-3 max-w-5xl"><a href="{% url 'talent_discovery' %}" class="inline-flex rounded-lg py-2 text-xs font-semibold text-slate-600 transition hover:text-orange-600 focus:outline-none focus:ring-2 focus:ring-orange-500 sm:text-sm">&larr; Browse all talent</a></div>
@@ -72,12 +82,29 @@
     const openButton = document.getElementById('scout-agent-open');
 
     const addMessage = (text, sender) => {
+        const isUser = sender === 'user';
+        const row = document.createElement('div');
+        row.className = `flex w-full items-start gap-2.5 sm:gap-3 ${isUser ? 'justify-end' : 'justify-start'}`;
+        const label = document.createElement('span');
+        label.className = 'sr-only';
+        label.textContent = isUser ? 'You: ' : 'Scout AI: ';
+        const avatar = document.createElement('span');
+        avatar.className = isUser
+            ? 'mt-0.5 flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-slate-200 text-slate-600 ring-1 ring-inset ring-slate-300 sm:h-9 sm:w-9'
+            : 'mt-0.5 flex h-8 w-8 shrink-0 items-center justify-center rounded-xl bg-orange-500 text-white shadow-sm sm:h-9 sm:w-9';
+        avatar.setAttribute('aria-hidden', 'true');
+        avatar.innerHTML = isUser
+            ? '<svg class="h-5 w-5" viewBox="0 0 24 24" fill="currentColor"><path d="M12 12a4.25 4.25 0 100-8.5A4.25 4.25 0 0012 12zm0 2c-4.06 0-7.25 2.12-7.25 4.75v1.5h14.5v-1.5C19.25 16.12 16.06 14 12 14z"/></svg>'
+            : '<svg class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8" d="M12 3l1.8 5.2L19 10l-5.2 1.8L12 17l-1.8-5.2L5 10l5.2-1.8L12 3zm6 11l1.2 2.8L22 18l-2.8 1.2L18 22l-1.2-2.8L14 18l2.8-1.2L18 14z"/></svg>';
         const bubble = document.createElement('div');
-        bubble.className = sender === 'user'
-            ? 'max-w-[92%] break-words self-end rounded-2xl rounded-tr-sm bg-slate-900 px-3.5 py-2.5 text-[13px] leading-5 text-white shadow-sm whitespace-pre-wrap sm:max-w-[82%] sm:px-4 sm:py-3 sm:text-sm sm:leading-6'
-            : 'max-w-[96%] break-words self-start rounded-2xl rounded-tl-sm border border-slate-200 bg-white px-3.5 py-2.5 text-[13px] leading-5 text-slate-700 shadow-sm whitespace-pre-wrap sm:max-w-[86%] sm:px-4 sm:py-3 sm:text-sm sm:leading-6';
+        bubble.className = isUser
+            ? 'max-w-[calc(100%_-_2.75rem)] break-words rounded-2xl rounded-tr-sm bg-slate-900 px-3.5 py-2.5 text-[13px] leading-5 text-white shadow-sm whitespace-pre-wrap sm:max-w-[82%] sm:px-4 sm:py-3 sm:text-sm sm:leading-6'
+            : 'max-w-[calc(100%_-_2.75rem)] break-words rounded-2xl rounded-tl-sm border border-slate-200 bg-white px-3.5 py-2.5 text-[13px] leading-5 text-slate-700 shadow-sm whitespace-pre-wrap sm:max-w-[88%] sm:px-4 sm:py-3 sm:text-sm sm:leading-6';
         bubble.textContent = text;
-        messages.appendChild(bubble);
+        row.appendChild(label);
+        if (isUser) row.append(bubble, avatar);
+        else row.append(avatar, bubble);
+        messages.appendChild(row);
         messages.scrollTop = messages.scrollHeight;
         return bubble;
     };
@@ -214,12 +241,24 @@
         });
     }
 
+    input.addEventListener('input', () => {
+        input.style.height = 'auto';
+        input.style.height = `${Math.min(input.scrollHeight, 144)}px`;
+    });
+    input.addEventListener('keydown', event => {
+        if (event.key === 'Enter' && !event.shiftKey && !event.isComposing) {
+            event.preventDefault();
+            if (!submit.disabled) form.requestSubmit();
+        }
+    });
+
     form.addEventListener('submit', async event => {
         event.preventDefault();
         const question = input.value.trim();
         if (!question) return;
         addMessage(question, 'user');
         input.value = '';
+        input.style.height = 'auto';
         submit.disabled = true;
         const typing = showTyping();
         let answer;
