@@ -1051,58 +1051,66 @@ def talent_discovery(request):
 
 def athlete_detail(request, athlete_id):
     athlete = get_object_or_404(AthleteProfile, id=athlete_id)
-    # Get verified performances
-    verified_performances = (
-        Performance.objects.filter(
-            athlete=athlete,
-            verification__status='APPROVED'
-        )
-        .select_related('event')
-        .order_by('competition_date')[:15] # Limit to the latest 15 performances
+    # Keep event summaries complete while showing a manageable recent history.
+    all_verified_performances = Performance.objects.filter(
+        athlete=athlete,
+        verification__status='APPROVED'
+    ).select_related('event')
+    recent_performances = list(
+        all_verified_performances
+        .order_by('-competition_date', '-pk')[:15]
     )
+    recent_performances.sort(key=lambda performance: (performance.competition_date, performance.pk))
 
-    # Calculate the athletes age from their date of birth
+    # Calculate the athlete's age from their date of birth.
     def calculate_age(born):
         from datetime import date
         today = date.today()
         return today.year - born.year - ((today.month, today.day) < (born.month, born.day))
     age = calculate_age(athlete.date_of_birth) if athlete.date_of_birth else None
 
-    # Get events with verified performances
-    events = Event.objects.filter(performances__in=verified_performances).distinct()
+    events = Event.objects.filter(
+        performances__athlete=athlete,
+        performances__verification__status='APPROVED',
+    ).distinct().order_by('name')
 
-    # Existing event statistics
     event_statistics = []
-
     for event in events:
         average = athlete.get_event_average(event)
         best = athlete.get_event_best_result(event)
         verified_races = athlete.get_verified_race_count(event)
-
+        standing = next(
+            (row for row in calculate_event_rankings(event) if row['athlete'].pk == athlete.pk),
+            None,
+        )
         if average is not None:
             event_statistics.append({
                 'event': event,
                 'average': average,
                 'best': best,
                 'verified_races': verified_races,
+                'position': standing['position'] if standing and not standing['is_provisional'] else None,
+                'provisional_position': standing['provisional_position'] if standing and standing['is_provisional'] else None,
+                'fully_ranked': standing['fully_ranked'] if standing else False,
             })
 
-    # Prepare performance data for the line graph
-    performance_data = []
-
-    for performance in verified_performances:
-        performance_data.append({
+    performance_data = [
+        {
             'event': performance.event.name,
             'result': float(performance.result),
             'date': performance.competition_date.strftime('%Y-%m-%d'),
             'competition': performance.competition_name,
-        })
+        }
+        for performance in recent_performances
+    ]
 
     context = {
         'athlete': athlete,
         'event_statistics': event_statistics,
         'performance_data': performance_data,
+        'recent_performances': recent_performances,
+        'total_verified_races': all_verified_performances.count(),
         'age': age,
     }
 
-    return render(request, 'core/athlete_detail.html',context)
+    return render(request, 'core/athlete_detail.html', context)

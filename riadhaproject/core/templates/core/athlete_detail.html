@@ -1,234 +1,169 @@
 {% extends 'core/base.html' %}
 {% load time_filters compress %}
 
-{% block title %}
-{{ athlete.user.get_full_name|default:athlete.user.username }} - SakaTalent
-{% endblock %}
+{% block title %}{{ athlete.user.get_full_name|default:athlete.user.username }} - SakaTalent{% endblock %}
 
 {% block content %}
-<div class="max-w-4xl mx-auto space-y-4 py-3">
-
-    <!-- Top Navigation Bar -->
-    <div class="flex flex-wrap items-center justify-between gap-2 border-b border-slate-200 pb-3">
-        <a href="{% url 'talent_discovery' %}" 
-           class="inline-flex items-center text-xs font-heading font-bold uppercase tracking-wider text-slate-500 hover:text-slate-900 transition-colors">
-            &larr; Back to Talent Discovery
+<main class="mx-auto max-w-6xl space-y-6 px-1 py-5 sm:py-8">
+    <nav class="flex items-center justify-between gap-3" aria-label="Breadcrumb">
+        <a href="{% url 'talent_discovery' %}" class="inline-flex items-center gap-2 rounded-lg py-2 text-sm font-semibold text-slate-600 transition hover:text-orange-600 focus:outline-none focus:ring-2 focus:ring-orange-500">
+            <svg class="h-4 w-4" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true"><path fill-rule="evenodd" d="M17 10a.75.75 0 01-.75.75H5.56l3.22 3.22a.75.75 0 11-1.06 1.06l-4.5-4.5a.75.75 0 010-1.06l4.5-4.5a.75.75 0 111.06 1.06l-3.22 3.22h10.69A.75.75 0 0117 10z" clip-rule="evenodd"/></svg>
+            Talent discovery
         </a>
-        <div class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-slate-100 border border-slate-200 text-xs font-heading font-bold uppercase tracking-wider text-slate-600">
-            Athlete Profile
-        </div>
-    </div>
+        <span class="rounded-full border border-slate-200 bg-white px-3 py-1.5 text-xs font-semibold uppercase tracking-wider text-slate-500">Athlete profile</span>
+    </nav>
 
-    <!-- Main Profile Card -->
-    <div class="bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden">
-        
-        <!-- Hero Decorative Header -->
-        <div class="h-24 sm:h-28 bg-slate-900 relative">
-            <div class="absolute inset-0 opacity-10 bg-[radial-gradient(#f97316_1px,transparent_1px)] [background-size:16px_16px]"></div>
-        </div>
-
-        <div class="p-4 sm:p-6 -mt-10 sm:-mt-12 relative z-10 space-y-5">
-            
-            <!-- Profile Header Row -->
-            <div class="flex flex-col sm:flex-row items-center sm:items-end gap-4 pb-5 border-b border-slate-100">
-                
-                <!-- Name & Verification Badge Header -->
-                <div class="space-y-1.5 text-center sm:text-left flex-1">
-                    <div class="flex flex-wrap items-center justify-center sm:justify-start gap-2">
-                        {% if athlete.is_verified %}
-                            <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-[11px] font-heading font-bold bg-emerald-100 text-emerald-800 border border-emerald-200 uppercase tracking-wide">
-                                <svg class="w-3 h-3 mr-1 text-emerald-600" fill="currentColor" viewBox="0 0 20 20">
-                                    <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"/>
-                                </svg>
-                                Verified Athlete
-                            </span>
-                        {% else %}
-                            <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-[11px] font-heading font-bold bg-amber-100 text-amber-800 border border-amber-200 uppercase tracking-wide">
-                                <svg class="w-3 h-3 mr-1 text-amber-600" fill="currentColor" viewBox="0 0 20 20">
-                                    <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm1-12a1 1 0 10-2 0v4a1 1 0 00.293.707l2.828 2.829a1 1 0 101.415-1.415L11 9.586V6z" clip-rule="evenodd"/>
-                                </svg>
-                                Pending Verification
-                            </span>
-                        {% endif %}
-                    </div>
-
-                    <h1 class="font-heading font-extrabold text-2xl sm:text-3xl text-slate-900 uppercase tracking-tight">
-                        {{ athlete.user.get_full_name|default:athlete.user.username }}
-                    </h1>
-                </div>
-
-                <!-- Profile Image / Initials Fallback follows the name -->
-                <div class="relative flex-shrink-0">
+    <section class="overflow-hidden rounded-3xl border border-slate-200 bg-white shadow-sm" aria-labelledby="athlete-name">
+        <div class="relative isolate overflow-hidden bg-[#0b132b] px-5 pb-7 pt-7 text-white sm:px-9 sm:pb-9 sm:pt-9">
+            <div class="absolute inset-0 -z-10 opacity-20" style="background-image: radial-gradient(circle at 85% 20%, #ff4500 0, transparent 26%), linear-gradient(115deg, transparent 55%, rgba(37,99,235,.4) 100%);"></div>
+            <div class="absolute -right-12 -top-20 -z-10 h-64 w-64 rounded-full border border-white/10"></div>
+            <div class="absolute -right-3 -top-11 -z-10 h-44 w-44 rounded-full border border-white/10"></div>
+            <div class="flex flex-col gap-6 sm:flex-row sm:items-center">
+                <div class="relative mx-auto shrink-0 sm:mx-0">
                     {% if athlete.profile_photo %}
-                        <img src="{{ athlete.profile_photo.url }}"
-                             alt="{{ athlete.user.get_full_name|default:athlete.user.username }}"
-                             class="w-24 h-24 sm:w-28 sm:h-28 rounded-2xl object-cover border-4 border-white shadow-md bg-slate-100">
+                        <img src="{{ athlete.profile_photo.url }}" alt="{{ athlete.user.get_full_name|default:athlete.user.username }}" class="h-28 w-28 rounded-2xl border-4 border-white/90 object-cover shadow-xl sm:h-32 sm:w-32">
                     {% else %}
-                        <div class="w-24 h-24 sm:w-28 sm:h-28 rounded-2xl bg-slate-800 text-white border-4 border-white shadow-md flex items-center justify-center font-heading font-extrabold text-3xl">
+                        <div class="flex h-28 w-28 items-center justify-center rounded-2xl border-4 border-white/90 bg-white/10 text-4xl font-black text-white shadow-xl sm:h-32 sm:w-32" aria-label="Athlete initials">
                             {{ athlete.user.first_name|first|default:athlete.user.username|first|upper }}
                         </div>
                     {% endif %}
+                    <span class="absolute -bottom-2 -right-2 h-6 w-6 rounded-full border-4 border-[#0b132b] {% if athlete.is_verified %}bg-emerald-400{% else %}bg-amber-400{% endif %}" aria-hidden="true"></span>
                 </div>
-
-            </div>
-
-            <!-- Key Profile Stats Grid (Age, Gender, County, Location) -->
-            <div class="grid grid-cols-2 sm:grid-cols-4 gap-3">
-                
-                <!-- Age Card -->
-                <div class="bg-slate-50 rounded-xl p-3 border border-slate-100 space-y-0.5">
-                    <span class="text-[10px] font-heading font-bold uppercase tracking-wider text-slate-400 block">Age</span>
-                    <p class="font-bold text-slate-800 text-sm sm:text-base">
-                        {% if age is not None %}
-                            {{ age }} <span class="text-xs text-slate-500 font-normal">years</span>
+                <div class="min-w-0 flex-1 text-center sm:text-left">
+                    <div class="mb-2 flex flex-wrap items-center justify-center gap-2 sm:justify-start">
+                        {% if athlete.is_verified %}
+                            <span class="inline-flex items-center gap-1.5 rounded-full bg-emerald-400/15 px-3 py-1 text-xs font-bold text-emerald-200 ring-1 ring-inset ring-emerald-300/30">
+                                <svg class="h-3.5 w-3.5" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true"><path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.78-9.22a.75.75 0 00-1.06-1.06L9 11.44 7.28 9.72a.75.75 0 00-1.06 1.06l2.25 2.25a.75.75 0 001.06 0l4.25-4.25z" clip-rule="evenodd"/></svg>
+                                Verified athlete
+                            </span>
                         {% else %}
-                            <span class="text-slate-400 font-normal text-xs">Not Specified</span>
+                            <span class="rounded-full bg-amber-300/15 px-3 py-1 text-xs font-bold text-amber-100 ring-1 ring-inset ring-amber-200/30">Verification pending</span>
                         {% endif %}
-                    </p>
-                </div>
-
-                <!-- Gender Card -->
-                <div class="bg-slate-50 rounded-xl p-3 border border-slate-100 space-y-0.5">
-                    <span class="text-[10px] font-heading font-bold uppercase tracking-wider text-slate-400 block">Gender</span>
-                    <p class="font-bold text-slate-800 text-sm sm:text-base truncate">
-                        {{ athlete.get_gender_display|default:"Not Specified" }}
-                    </p>
-                </div>
-
-                <!-- County Card -->
-                <div class="bg-slate-50 rounded-xl p-3 border border-slate-100 space-y-0.5">
-                    <span class="text-[10px] font-heading font-bold uppercase tracking-wider text-slate-400 block">County</span>
-                    <p class="font-bold text-slate-800 text-sm sm:text-base truncate">
-                        {{ athlete.county|default:"Not Specified" }}
-                    </p>
-                </div>
-
-                <!-- Location Card -->
-                <div class="bg-slate-50 rounded-xl p-3 border border-slate-100 space-y-0.5">
-                    <span class="text-[10px] font-heading font-bold uppercase tracking-wider text-slate-400 block">Location</span>
-                    <p class="font-bold text-slate-800 text-sm sm:text-base truncate">
-                        {{ athlete.location|default:"Not Specified" }}
-                    </p>
-                </div>
-
-            </div>
-
-            <!-- Athlete Bio Section -->
-            <div class="bg-slate-50/70 rounded-xl p-4 sm:p-5 border border-slate-200/80 space-y-2">
-                <div class="flex items-center gap-1.5">
-                    <svg class="w-4 h-4 text-orange-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"/>
-                    </svg>
-                    <h2 class="font-heading font-extrabold text-xs uppercase tracking-wider text-slate-600">
-                        Athlete Biography
-                    </h2>
-                </div>
-                
-                {% if athlete.bio %}
-                    <p class="text-slate-700 text-xs sm:text-sm leading-relaxed whitespace-pre-line font-normal">
-                        {{ athlete.bio }}
-                    </p>
-                {% else %}
-                    <p class="text-slate-400 text-xs italic">
-                        No biography provided for this athlete yet.
-                    </p>
-                {% endif %}
-            </div>
-
-            <!-- Performance Summary & Progression Section -->
-            <div class="pt-4 border-t border-slate-100 space-y-3">
-                <div class="flex items-center justify-between">
-                    <h2 class="font-heading font-extrabold text-base text-slate-900 uppercase tracking-wide">
-                        Performance Progression
-                    </h2>
-                    <span class="text-[10px] font-heading uppercase tracking-wider text-slate-400 font-semibold">
-                        Verified Metrics
-                    </span>
-                </div>
-
-                {% if event_statistics %}
-                    <div class="grid grid-cols-1 gap-4">
-                        {% for item in event_statistics %}
-                            <div class="rounded-2xl bg-white p-4 sm:p-6 border border-slate-200 shadow-sm hover:shadow-md transition-shadow space-y-5">
-                                
-                                <!-- Event Header & Verified Races Count -->
-                                <div class="flex items-center justify-between gap-3 border-b border-slate-100 pb-3">
-                                    <span class="text-[11px] font-heading font-bold uppercase tracking-wider text-orange-600 bg-orange-50 border border-orange-200 px-2.5 py-0.5 rounded-full">
-                                        {{ item.event.name }}
-                                    </span>
-                                    <div class="flex items-center gap-1.5 text-xs font-heading font-bold text-slate-600">
-                                        <span class="w-1.5 h-1.5 rounded-full bg-emerald-500"></span>
-                                        {{ item.verified_races }} Verified Race{% if item.verified_races != 1 %}s{% endif %}
-                                    </div>
-                                </div>
-
-                                <!-- Stat Comparison Grid (Average vs Best) -->
-                                <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                                    <div class="rounded-xl bg-slate-50 p-3 sm:p-4 border border-slate-100">
-                                        <p class="text-[10px] font-heading font-semibold text-slate-400 uppercase tracking-wider mb-0.5">Average Time</p>
-                                        <p class="text-lg font-heading font-extrabold text-slate-900">
-                                            {{ item.average|format_seconds }} 
-                                        </p>
-                                    </div>
-
-                                    <div class="rounded-xl bg-slate-50 p-3 sm:p-4 border border-slate-100">
-                                        <p class="text-[10px] font-heading font-semibold text-slate-400 uppercase tracking-wider mb-0.5">Personal Best</p>
-                                        <p class="text-lg font-heading font-extrabold text-blue-600">
-                                            {{ item.best|format_seconds }} 
-                                        </p>
-                                    </div>
-                                </div>
-
-                                <!-- Individual Event Performance Graph -->
-                                <section class="pt-1" aria-label="{{ item.event.name }} performance graph">
-                                    <div class="flex flex-col gap-2 sm:flex-row sm:items-end sm:justify-between mb-3">
-                                        <div>
-                                            <h3 class="font-heading text-sm font-extrabold uppercase tracking-wide text-slate-800">Performance trend</h3>
-                                            <p class="mt-0.5 text-xs text-slate-500">Race time by competition date</p>
-                                        </div>
-                                        <span class="inline-flex w-fit items-center gap-2 rounded-full bg-orange-50 px-3 py-1 text-[11px] font-bold text-orange-700 border border-orange-100">
-                                            <span class="h-2 w-2 rounded-full bg-orange-500"></span>
-                                            Faster times rise
-                                        </span>
-                                    </div>
-                                    <div class="rounded-xl border border-slate-200 bg-slate-50/80 p-2 sm:p-4">
-                                        <div class="relative h-60 sm:h-72">
-                                            <canvas class="event-chart" data-event-name="{{ item.event.name }}" role="img" aria-label="{{ item.event.name }} race times over competition dates"></canvas>
-                                        </div>
-                                    </div>
-                                </section>
-
-                            </div>
-                        {% endfor %}
+                        {% if athlete.get_gender_display %}<span class="rounded-full bg-white/10 px-3 py-1 text-xs font-semibold text-slate-100 ring-1 ring-inset ring-white/15">{{ athlete.get_gender_display }}</span>{% endif %}
                     </div>
-                {% else %}
-                    <div class="bg-slate-50 rounded-xl border border-dashed border-slate-200 p-4 text-center">
-                        <p class="text-slate-500 text-xs">No verified performances available yet.</p>
-                    </div>
-                {% endif %}
+                    <h1 id="athlete-name" class="break-words font-heading text-3xl font-extrabold tracking-tight sm:text-4xl lg:text-5xl">{{ athlete.user.get_full_name|default:athlete.user.username }}</h1>
+                    <p class="mt-2 text-sm text-slate-300">Athlete profile on SakaTalent</p>
+                </div>
+                <div class="hidden shrink-0 text-right sm:block">
+                    <p class="text-xs font-bold uppercase tracking-[.18em] text-slate-400">SakaTalent</p>
+                    <p class="mt-1 font-heading text-lg font-bold text-white">Athlete profile</p>
+                </div>
             </div>
-
         </div>
 
-    </div>
+        <div class="grid grid-cols-2 divide-x divide-slate-200 border-b border-slate-200 bg-slate-50/80 sm:grid-cols-3">
+            <div class="px-5 py-4 sm:px-8 sm:py-5">
+                <p class="text-xs font-bold uppercase tracking-wider text-slate-500">Approved races</p>
+                <p class="mt-1 font-heading text-2xl font-extrabold text-slate-900">{{ total_verified_races }}</p>
+            </div>
+            <div class="px-5 py-4 sm:px-8 sm:py-5">
+                <p class="text-xs font-bold uppercase tracking-wider text-slate-500">Events with results</p>
+                <p class="mt-1 font-heading text-2xl font-extrabold text-slate-900">{{ event_statistics|length }}</p>
+            </div>
+            <div class="col-span-2 border-t border-slate-200 px-5 py-4 sm:col-span-1 sm:border-l sm:border-t-0 sm:px-8 sm:py-5">
+                <p class="text-xs font-bold uppercase tracking-wider text-slate-500">Age</p>
+                <p class="mt-1 font-heading text-2xl font-extrabold text-slate-900">{% if age is not None %}{{ age }} <span class="text-sm font-semibold text-slate-500">years</span>{% else %}<span class="text-base font-semibold text-slate-400">Not provided</span>{% endif %}</p>
+            </div>
+        </div>
 
-</div>
+        <div class="grid gap-6 p-5 sm:p-8 lg:grid-cols-[minmax(0,1.6fr)_minmax(16rem,.8fr)]">
+            <section aria-labelledby="about-heading">
+                <p class="text-xs font-bold uppercase tracking-[.16em] text-orange-600">About</p>
+                <h2 id="about-heading" class="mt-1 font-heading text-xl font-extrabold text-slate-900">Athlete biography</h2>
+                {% if athlete.bio %}
+                    <p class="mt-3 whitespace-pre-line text-sm leading-7 text-slate-600">{{ athlete.bio }}</p>
+                {% else %}
+                    <p class="mt-3 text-sm leading-6 text-slate-500">This athlete hasn’t added a biography yet.</p>
+                {% endif %}
+            </section>
+            <aside class="rounded-2xl border border-slate-200 bg-slate-50 p-5" aria-label="Athlete details">
+                <h2 class="font-heading text-sm font-extrabold uppercase tracking-wider text-slate-800">Athlete details</h2>
+                <dl class="mt-4 space-y-4">
+                    <div><dt class="text-xs font-semibold text-slate-500">Home county</dt><dd class="mt-0.5 font-semibold text-slate-900">{{ athlete.get_county_display|default:'Not provided' }}</dd></div>
+                    <div><dt class="text-xs font-semibold text-slate-500">Town / location</dt><dd class="mt-0.5 font-semibold text-slate-900">{{ athlete.location|default:'Not provided' }}</dd></div>
+                </dl>
+            </aside>
+        </div>
+    </section>
 
+    <section class="space-y-4" aria-labelledby="performances-heading">
+        <div class="flex flex-col gap-2 sm:flex-row sm:items-end sm:justify-between">
+            <div>
+                <p class="text-xs font-bold uppercase tracking-[.16em] text-orange-600">Verified results</p>
+                <h2 id="performances-heading" class="font-heading text-2xl font-extrabold text-slate-900 sm:text-3xl">Performance by event</h2>
+            </div>
+            <p class="max-w-xl text-sm leading-6 text-slate-500">Average time, personal best, ranking status, and recent progress for each event. Lower times are faster.</p>
+        </div>
+
+        {% if event_statistics %}
+            <div class="grid gap-5 xl:grid-cols-2">
+                {% for item in event_statistics %}
+                    <article class="overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm">
+                        <header class="flex flex-wrap items-center justify-between gap-3 border-b border-slate-100 px-5 py-4 sm:px-6">
+                            <h3 class="font-heading text-lg font-extrabold text-slate-900">{{ item.event.name }}</h3>
+                            {% if item.position %}
+                                <span class="rounded-full bg-blue-50 px-3 py-1 text-xs font-bold text-blue-800">Rank #{{ item.position }}{% if item.fully_ranked %} · Fully ranked{% endif %}</span>
+                            {% else %}
+                                <span class="rounded-full bg-amber-50 px-3 py-1 text-xs font-bold text-amber-800">Provisional #{{ item.provisional_position }}</span>
+                            {% endif %}
+                        </header>
+                        <div class="grid grid-cols-3 divide-x divide-slate-100 px-2 py-4 sm:px-4">
+                            <div class="px-3"><p class="text-[11px] font-bold uppercase tracking-wide text-slate-500">Average</p><p class="mt-1 font-heading text-lg font-extrabold text-slate-900 sm:text-xl">{{ item.average|format_seconds }}</p></div>
+                            <div class="px-3"><p class="text-[11px] font-bold uppercase tracking-wide text-slate-500">Personal best</p><p class="mt-1 font-heading text-lg font-extrabold text-blue-700 sm:text-xl">{{ item.best|format_seconds }}</p></div>
+                            <div class="px-3"><p class="text-[11px] font-bold uppercase tracking-wide text-slate-500">Approved races</p><p class="mt-1 font-heading text-lg font-extrabold text-slate-900 sm:text-xl">{{ item.verified_races }}</p></div>
+                        </div>
+                        <div class="px-4 pb-5 sm:px-6">
+                            <div class="mb-3 flex items-center justify-between gap-3">
+                                <div><h4 class="text-sm font-bold text-slate-800">Progress trend</h4><p class="text-xs text-slate-500">Approved race times by date</p></div>
+                                <span class="whitespace-nowrap rounded-full bg-orange-50 px-2.5 py-1 text-[11px] font-bold text-orange-700">Faster times rise</span>
+                            </div>
+                            <div class="rounded-xl border border-slate-100 bg-slate-50 p-2 sm:p-3">
+                                <div class="relative h-52 sm:h-60"><canvas class="event-chart" data-event-name="{{ item.event.name }}" role="img" aria-label="{{ item.event.name }} performance trend by date"></canvas></div>
+                            </div>
+                        </div>
+                    </article>
+                {% endfor %}
+            </div>
+        {% else %}
+            <div class="rounded-2xl border border-dashed border-slate-300 bg-white px-6 py-10 text-center">
+                <div class="mx-auto flex h-12 w-12 items-center justify-center rounded-2xl bg-slate-100 text-slate-500">
+                    <svg class="h-6 w-6" viewBox="0 0 24 24" fill="none" stroke="currentColor" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8" d="M4 19V5m0 14h16M7 15l4-4 3 2 5-6"/></svg>
+                </div>
+                <h3 class="mt-3 font-heading text-lg font-extrabold text-slate-900">No approved results yet</h3>
+                <p class="mt-1 text-sm text-slate-500">Approved race performances will appear here when they are available.</p>
+            </div>
+        {% endif %}
+    </section>
+
+    {% if recent_performances %}
+    <section class="overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm" aria-labelledby="race-history-heading">
+        <div class="flex flex-col gap-2 border-b border-slate-200 px-5 py-5 sm:flex-row sm:items-end sm:justify-between sm:px-6">
+            <div><p class="text-xs font-bold uppercase tracking-[.16em] text-orange-600">Race log</p><h2 id="race-history-heading" class="font-heading text-xl font-extrabold text-slate-900">Recent approved races</h2></div>
+            <p class="text-sm text-slate-500">Showing the latest {{ recent_performances|length }} of {{ total_verified_races }} approved races</p>
+        </div>
+        <div class="overflow-x-auto">
+            <table class="min-w-full divide-y divide-slate-100 text-left text-sm">
+                <thead class="bg-slate-50 text-xs font-bold uppercase tracking-wider text-slate-500"><tr><th class="px-5 py-3 sm:px-6">Event</th><th class="px-5 py-3">Competition</th><th class="px-5 py-3">Date</th><th class="px-5 py-3 text-right sm:px-6">Result</th></tr></thead>
+                <tbody class="divide-y divide-slate-100">
+                    {% for performance in recent_performances reversed %}
+                    <tr class="hover:bg-slate-50/80"><td class="whitespace-nowrap px-5 py-3 font-semibold text-slate-800 sm:px-6">{{ performance.event.name }}</td><td class="min-w-48 px-5 py-3 text-slate-600">{{ performance.competition_name|default:'Competition not provided' }}</td><td class="whitespace-nowrap px-5 py-3 text-slate-500">{{ performance.competition_date|date:'j M Y' }}</td><td class="whitespace-nowrap px-5 py-3 text-right font-heading font-extrabold text-slate-900 sm:px-6">{{ performance.result|format_seconds }}</td></tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </section>
+    {% endif %}
+</main>
 {% endblock %}
 
 {% block extra_js %}
-<!-- JSON Data Script -->
-{% if performance_data %}
-    {{ performance_data|json_script:"performance-data" }}
-{% endif %}
-
+{% if performance_data %}{{ performance_data|json_script:"performance-data" }}{% endif %}
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 {% compress js %}<script>
-    document.addEventListener('DOMContentLoaded', function() {
-        const scriptElem = document.getElementById('performance-data');
-        if (!scriptElem) return;
-
-        const performanceData = JSON.parse(scriptElem.textContent);
+    document.addEventListener('DOMContentLoaded', function () {
+        const dataElement = document.getElementById('performance-data');
+        if (!dataElement || typeof Chart === 'undefined') return;
+        const performances = JSON.parse(dataElement.textContent);
         const formatRaceTime = value => {
             let centiseconds = Math.round(Number(value) * 100);
             const hours = Math.floor(centiseconds / 360000);
@@ -237,128 +172,47 @@
             centiseconds %= 6000;
             const seconds = Math.floor(centiseconds / 100);
             const fraction = String(centiseconds % 100).padStart(2, '0');
-            const paddedSeconds = String(seconds).padStart(2, '0');
-            if (hours) return `${hours}h ${String(minutes).padStart(2, '0')}m ${paddedSeconds}.${fraction}s`;
-            if (minutes) return `${minutes}m ${paddedSeconds}.${fraction}s`;
+            if (hours) return `${hours}h ${String(minutes).padStart(2, '0')}m ${String(seconds).padStart(2, '0')}.${fraction}s`;
+            if (minutes) return `${minutes}m ${String(seconds).padStart(2, '0')}.${fraction}s`;
             return `${seconds}.${fraction}s`;
         };
-        const chartCanvases = document.querySelectorAll('.event-chart');
-
-        chartCanvases.forEach(canvas => {
-            const eventName = canvas.dataset.eventName;
-
-            // Filter data for this specific event
-            const filteredData = performanceData.filter(item => item.event === eventName);
-
-            // Sort chronologically by competition date
-            filteredData.sort((a, b) => new Date(a.date) - new Date(b.date));
-
-            if (filteredData.length === 0) return;
-
-            const labels = filteredData.map(item => item.date);
-            const results = filteredData.map(item => item.result);
-
-            const chartContext = canvas.getContext('2d');
-            const areaGradient = chartContext.createLinearGradient(0, 0, 0, 320);
-            areaGradient.addColorStop(0, 'rgba(249, 115, 22, 0.22)');
-            areaGradient.addColorStop(1, 'rgba(249, 115, 22, 0.015)');
-
+        document.querySelectorAll('.event-chart').forEach(canvas => {
+            const points = performances.filter(item => item.event === canvas.dataset.eventName);
+            if (!points.length) {
+                canvas.closest('.rounded-xl').innerHTML = '<p class="py-12 text-center text-sm text-slate-500">No recent results to chart for this event.</p>';
+                return;
+            }
+            const labels = points.map(item => item.date);
+            const context = canvas.getContext('2d');
+            const gradient = context.createLinearGradient(0, 0, 0, 260);
+            gradient.addColorStop(0, 'rgba(255, 69, 0, .18)');
+            gradient.addColorStop(1, 'rgba(255, 69, 0, .01)');
             new Chart(canvas, {
                 type: 'line',
-                data: {
-                    labels: labels,
-                    datasets: [{
-                        label: 'Race time',
-                        data: results,
-                        borderColor: '#f97316',
-                        backgroundColor: areaGradient,
-                        borderWidth: 3,
-                        tension: 0.35,
-                        fill: true,
-                        pointRadius: 4,
-                        pointHoverRadius: 7,
-                        pointHitRadius: 14,
-                        pointBackgroundColor: '#ffffff',
-                        pointBorderColor: '#f97316',
-                        pointBorderWidth: 2.5,
-                        pointHoverBackgroundColor: '#f97316',
-                        pointHoverBorderColor: '#ffffff',
-                        pointHoverBorderWidth: 3
-                    }]
-                },
+                data: { labels, datasets: [{
+                    label: 'Race time', data: points.map(item => item.result),
+                    borderColor: '#ff4500', backgroundColor: gradient, borderWidth: 2.5,
+                    tension: .3, fill: true, pointRadius: 3.5, pointHoverRadius: 6,
+                    pointBackgroundColor: '#fff', pointBorderColor: '#ff4500', pointBorderWidth: 2
+                }] },
                 options: {
-                    responsive: true,
-                    maintainAspectRatio: false,
-                    normalized: true,
-                    animation: { duration: 450 },
+                    responsive: true, maintainAspectRatio: false, normalized: true,
                     interaction: { mode: 'nearest', intersect: false },
                     plugins: {
                         legend: { display: false },
                         tooltip: {
-                            enabled: true,
-                            displayColors: false,
-                            padding: 12,
-                            cornerRadius: 10,
-                            backgroundColor: '#0f172a',
-                            titleColor: '#cbd5e1',
-                            bodyColor: '#ffffff',
-                            titleFont: { family: 'Inter', size: 11, weight: '600' },
-                            bodyFont: { family: 'Inter', size: 13, weight: '700' },
+                            displayColors: false, padding: 11, cornerRadius: 10,
+                            backgroundColor: '#0b132b',
                             callbacks: {
-                                title: function(items) {
-                                    const date = labels[items[0].dataIndex];
-                                    return new Date(`${date}T00:00:00`).toLocaleDateString(undefined, {
-                                        month: 'short', day: 'numeric', year: 'numeric'
-                                    });
-                                },
-                                label: function(context) {
-                                    return `Time  ${formatRaceTime(context.parsed.y)}`;
-                                },
-                                afterLabel: function(context) {
-                                    const item = filteredData[context.dataIndex];
-                                    return `Competition  ${item.competition || 'Not provided'}`;
-                                }
+                                title: items => new Date(`${labels[items[0].dataIndex]}T00:00:00`).toLocaleDateString(undefined, { month: 'short', day: 'numeric', year: 'numeric' }),
+                                label: context => `Time  ${formatRaceTime(context.parsed.y)}`,
+                                afterLabel: context => `Competition  ${points[context.dataIndex].competition || 'Not provided'}`
                             }
                         }
                     },
                     scales: {
-                        x: {
-                            grid: { display: false, drawBorder: false },
-                            border: { display: false },
-                            ticks: {
-                                color: '#64748b',
-                                maxTicksLimit: 6,
-                                maxRotation: 0,
-                                autoSkip: true,
-                                padding: 8,
-                                font: { family: 'Inter', size: 10, weight: '500' },
-                                callback: function(value) {
-                                    const dateLabel = labels[Number(value)];
-                                    if (!dateLabel) return '';
-                                    const date = new Date(`${dateLabel}T00:00:00`);
-                                    return date.toLocaleDateString(undefined, {
-                                        month: 'short', day: 'numeric', year: '2-digit'
-                                    });
-                                }
-                            }
-                        },
-                        y: {
-                            reverse: true,
-                            beginAtZero: false,
-                            border: { display: false },
-                            grid: {
-                                color: 'rgba(148, 163, 184, 0.18)',
-                                drawBorder: false,
-                                drawTicks: false
-                            },
-                            ticks: {
-                                color: '#64748b',
-                                maxTicksLimit: 6,
-                                padding: 10,
-                                font: { family: 'Inter', size: 10, weight: '500' },
-                                callback: value => formatRaceTime(value)
-                            }
-                        }
+                        x: { grid: { display: false }, border: { display: false }, ticks: { color: '#64748b', maxTicksLimit: 5, maxRotation: 0, font: { size: 10 }, callback: value => { const date = labels[Number(value)]; return date ? new Date(`${date}T00:00:00`).toLocaleDateString(undefined, { month: 'short', day: 'numeric' }) : ''; } } },
+                        y: { reverse: true, beginAtZero: false, border: { display: false }, grid: { color: 'rgba(148,163,184,.18)' }, ticks: { color: '#64748b', maxTicksLimit: 5, padding: 8, font: { size: 10 }, callback: value => formatRaceTime(value) } }
                     }
                 }
             });
