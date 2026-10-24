@@ -1,4 +1,4 @@
-const CACHE_NAME = 'sakatalent-shell-v3';
+const CACHE_NAME = 'sakatalent-shell-v4';
 const APP_SHELL = [
   '/pwa-assets/offline.html',
   '/pwa-assets/icon-192.png',
