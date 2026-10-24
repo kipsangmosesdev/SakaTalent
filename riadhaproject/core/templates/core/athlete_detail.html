@@ -98,7 +98,7 @@
         {% if event_statistics %}
             <div class="grid gap-5 xl:grid-cols-2">
                 {% for item in event_statistics %}
-                    <article class="overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm">
+                    <article class="overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm{% if forloop.last and stretch_last_event_card %} xl:col-span-2{% endif %}">
                         <header class="flex flex-wrap items-center justify-between gap-3 border-b border-slate-100 px-5 py-4 sm:px-6">
                             <h3 class="font-heading text-lg font-extrabold text-slate-900">{{ item.event.name }}</h3>
                             {% if item.position %}

@@ -1110,6 +1110,7 @@ def athlete_detail(request, athlete_id):
         'performance_data': performance_data,
         'recent_performances': recent_performances,
         'total_verified_races': all_verified_performances.count(),
+        'stretch_last_event_card': len(event_statistics) % 2 == 1,
         'age': age,
     }
 
