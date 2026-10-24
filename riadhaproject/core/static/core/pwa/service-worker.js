@@ -1,10 +1,10 @@
-const CACHE_NAME = 'sakatalent-shell-v4';
+const CACHE_NAME = 'sakatalent-shell-v5';
 const APP_SHELL = [
   '/pwa-assets/offline.html',
-  '/pwa-assets/icon-192.png',
-  '/pwa-assets/icon-512.png',
-  '/pwa-assets/icon-maskable-512.png',
-  '/pwa-assets/icon-maskable.svg'
+  '/pwa-assets/icon-192.png?v=2',
+  '/pwa-assets/icon-512.png?v=2',
+  '/pwa-assets/icon-maskable-512.png?v=2',
+  '/pwa-assets/icon-maskable.svg?v=2'
 ];
 
 self.addEventListener('install', event => {

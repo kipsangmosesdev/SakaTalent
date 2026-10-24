@@ -10,9 +10,9 @@
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
     <meta name="apple-mobile-web-app-title" content="SakaTalent">
-    <link rel="manifest" href="{% url 'pwa_manifest' %}">
-    <link rel="icon" href="{% static 'core/favicon.svg' %}" type="image/svg+xml">
-    <link rel="apple-touch-icon" href="{% url 'pwa_asset' 'icon-192.png' %}">
+    <link rel="manifest" href="{% url 'pwa_manifest' %}?v=2">
+    <link rel="icon" href="{% static 'core/favicon.svg' %}?v=2" type="image/svg+xml">
+    <link rel="apple-touch-icon" href="{% url 'pwa_asset' 'icon-192.png' %}?v=2">
     <meta http-equiv="X-UA-Compatible" content="ie=edge">
     <title>{% block title %}SakaTalent{% endblock %}</title>
 
@@ -478,7 +478,7 @@
             });
 
             if ('serviceWorker' in navigator && window.isSecureContext) {
-                window.addEventListener('load', () => navigator.serviceWorker.register('/service-worker.js?v=3', { scope: '/' })
+                window.addEventListener('load', () => navigator.serviceWorker.register('/service-worker.js?v=4', { scope: '/' })
                     .catch(error => console.warn('Service worker registration failed:', error)));
             }
         })();
