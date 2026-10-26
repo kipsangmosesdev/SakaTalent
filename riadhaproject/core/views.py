@@ -324,8 +324,8 @@ def training_dashboard(request):
         target.best_result = min(results, key=lambda result: result.result) if results else None
         target.training_count = len(results)
         target.days_until_championship = (target.competition_date - today).days
-        if target.best_result:
-            target.time_gap = abs(target.target_result - target.best_result.result)
+        if target.latest_result:
+            target.latest_time_gap = abs(target.target_result - target.latest_result.result)
         if target.pk not in result_forms:
             result_forms[target.pk] = TrainingResultForm(target=target)
 

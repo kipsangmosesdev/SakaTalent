@@ -74,13 +74,13 @@
                             </div>
                             {% if target.competition_date < today %}
                                 <span class="rounded-full bg-amber-100 px-3 py-1.5 text-[10px] font-extrabold uppercase tracking-wider text-amber-800">Competition passed</span>
-                            {% elif target.best_result and target.best_result.result <= target.target_result %}
+                            {% elif target.latest_result and target.latest_result.result <= target.target_result %}
                                 <span class="rounded-full bg-emerald-100 px-3 py-1.5 text-[10px] font-extrabold uppercase tracking-wider text-emerald-800">Target reached</span>
                             {% else %}
                                 <span class="rounded-full bg-blue-50 px-3 py-1.5 text-[10px] font-extrabold uppercase tracking-wider text-blue-800">In progress</span>
                             {% endif %}
                         </div>
-                        <div class="mt-5 grid grid-cols-2 gap-3 sm:grid-cols-3">
+                        <div class="mt-5 grid grid-cols-2 gap-3 sm:grid-cols-4">
                             <div class="rounded-xl bg-white p-3 ring-1 ring-slate-200/80">
                                 <p class="text-[9px] font-extrabold uppercase tracking-wider text-slate-500">Target time</p>
                                 <p class="mt-1 font-heading text-xl font-extrabold text-orange-600">{{ target.target_result|format_seconds }}</p>
@@ -89,26 +89,30 @@
                                 <p class="text-[9px] font-extrabold uppercase tracking-wider text-slate-500">Training best</p>
                                 <p class="mt-1 font-heading text-xl font-extrabold text-slate-900">{% if target.best_result %}{{ target.best_result.result|format_seconds }}{% else %}&mdash;{% endif %}</p>
                             </div>
-                            <div class="col-span-2 rounded-xl bg-white p-3 ring-1 ring-slate-200/80 sm:col-span-1">
+                            <div class="rounded-xl bg-white p-3 ring-1 ring-slate-200/80">
+                                <p class="text-[9px] font-extrabold uppercase tracking-wider text-slate-500">Latest training</p>
+                                <p class="mt-1 font-heading text-xl font-extrabold text-slate-900">{% if target.latest_result %}{{ target.latest_result.result|format_seconds }}{% else %}&mdash;{% endif %}</p>
+                            </div>
+                            <div class="rounded-xl bg-white p-3 ring-1 ring-slate-200/80">
                                 <p class="text-[9px] font-extrabold uppercase tracking-wider text-slate-500">Sessions logged</p>
                                 <p class="mt-1 font-heading text-xl font-extrabold text-slate-900">{{ target.training_count }}</p>
                             </div>
                         </div>
-                        <div class="mt-4 rounded-xl px-4 py-3 text-sm leading-6 {% if target.best_result and target.best_result.result <= target.target_result %}bg-emerald-50 text-emerald-900{% elif target.competition_date < today %}bg-amber-50 text-amber-900{% else %}bg-blue-50 text-blue-900{% endif %}">
-                            {% if target.best_result and target.best_result.result <= target.target_result %}
-                                {% if target.time_gap %}
-                                    <strong>Congratulations!</strong> You beat your target by {{ target.time_gap|format_seconds }}. Keep it up!
+                        <div class="mt-4 rounded-xl px-4 py-3 text-sm leading-6 {% if target.latest_result and target.latest_result.result <= target.target_result %}bg-emerald-50 text-emerald-900{% elif target.competition_date < today %}bg-amber-50 text-amber-900{% else %}bg-blue-50 text-blue-900{% endif %}">
+                            {% if target.latest_result and target.latest_result.result <= target.target_result %}
+                                {% if target.latest_time_gap %}
+                                    <strong>Congratulations!</strong> Your latest session beat your target by {{ target.latest_time_gap|format_seconds }}. Keep it up!
                                 {% else %}
-                                    <strong>Congratulations!</strong> You reached your target time. Keep it up!
+                                    <strong>Congratulations!</strong> Your latest session reached your target time. Keep it up!
                                 {% endif %}
                             {% elif target.competition_date < today %}
-                                {% if target.best_result %}
-                                    Competition date passed. Your best was {{ target.time_gap|format_seconds }} over your target. Keep training for your next competition.
+                                {% if target.latest_result %}
+                                    Competition date passed. Your latest session was {{ target.latest_time_gap|format_seconds }} over your target. Keep training for your next competition.
                                 {% else %}
                                     Competition date passed with no training times logged. Add a target for your next competition and keep training.
                                 {% endif %}
-                            {% elif target.best_result %}
-                                You need to improve your best by {{ target.time_gap|format_seconds }} to reach your target by competition day.
+                            {% elif target.latest_result %}
+                                You need to improve your latest time by {{ target.latest_time_gap|format_seconds }} to reach your target by competition day.
                             {% else %}
                                 Log a training time to see how close you are to your target.
                             {% endif %}
