@@ -505,6 +505,12 @@ def get_scout_chat_history(request):
     ]
 
 
+def remember_scout_chat_turn(request, question, answer):
+    history = get_scout_chat_history(request)
+    history.append({'question': question[:500], 'answer': answer[:2000]})
+    request.session['scout_agent_history'] = history[-6:]
+
+
 def index(request):
     return render(request, 'core/index.html', {
         'scout_chat_history': get_scout_chat_history(request),
@@ -534,6 +540,13 @@ def scout_agent_ask(request):
     # Handle greeting-only messages before the default ranking path. Otherwise
     # an unfiltered message such as "hello" is treated as a request for top athletes.
     normalized = question.casefold().strip()
+    asks_who_developed = re.search(r'\bwho\b.*\b(developed|built|created|made|developer)\b', normalized)
+    asks_about_sakatalent = any(term in normalized for term in ('sakatalent', 'saka talent', 'system', 'platform', 'app', 'product'))
+    if asks_who_developed and asks_about_sakatalent:
+        answer = 'SakaTalent was developed by **Moses Kipsang.**'
+        remember_scout_chat_turn(request, question, answer)
+        return JsonResponse({'answer': answer})
+
     greeting_only = re.fullmatch(
         r"[\W_]*(?:hi|hello|hey|howdy|good\s+(?:morning|afternoon|evening))"
         r"[\W_]*(?:there|sotet|scout|saka)?[\W_]*",
@@ -883,8 +896,7 @@ def scout_json_reply(request, question, grounded_answer):
         except (ValueError, AttributeError):
             answer = ''
         if isinstance(answer, str) and answer:
-            history.append({'question': question[:500], 'answer': answer[:2000]})
-            request.session['scout_agent_history'] = history[-6:]
+            remember_scout_chat_turn(request, question, answer)
     return response
 
 
@@ -902,7 +914,7 @@ def scout_openai_answer_or_fallback(question, grounded_answer, conversation_hist
 
     developer_name = getattr(settings, 'SAKATALENT_DEVELOPER', '').strip() or 'not specified'
     instructions = f"""You are Sotet AI, the friendly and capable athletics scouting assistant in SakaTalent.
-Your name, Sotet, refers to a traditional Kalenjin calabash gourd (plural: sotonik) used to store fresh milk and ferment mursik, a traditional sour milk drink. According to the project owner's cultural note, the gourd is cleaned with a hard brush made from the sosiot tree, then lined inside with wosek (soot or charcoal dust) from aromatic trees such as itet (Senna didymobotrya) or sertwet (Acacia). The lining reduces porosity, helps preserve the milk, and gives it a smoky flavor and bluish hue. The owner chose the name to honor the many SakaTalent athletes from the Kalenjin community and this milk-vessel tradition. You are an AI, not a physical calabash, person, or genie. Answer identity questions accurately: you are Sotet AI, you assist users of SakaTalent, and Moses Kipsang developed SakaTalent alone as its sole developer. Do not attribute development to a team or to people who did not contribute. Do not claim to be the developer or OpenAI.
+Your name, Sotet, refers to a traditional Kalenjin calabash gourd (plural: sotonik) used to store fresh milk and ferment mursik, a traditional sour milk drink. According to the project owner's cultural note, the gourd is cleaned with a hard brush made from the sosiot tree, then lined inside with wosek (soot or charcoal dust) from aromatic trees such as itet (Senna didymobotrya) or sertwet (Acacia). The lining reduces porosity, helps preserve the milk, and gives it a smoky flavor and bluish hue. The owner chose the name to honor the many SakaTalent athletes from the Kalenjin community and this milk-vessel tradition. You are an AI, not a physical calabash, person, or genie. Answer identity questions accurately: you are Sotet AI, you assist users of SakaTalent, and Moses Kipsang developed SakaTalent alone as its sole developer. When asked who developed SakaTalent, answer exactly: SakaTalent was developed by **Moses Kipsang.** Do not add an explanation, role, sole-developer wording, or a profile link unless the user asks for it. Do not attribute development to a team or to people who did not contribute. Do not claim to be the developer or OpenAI.
 Your developer attribution is {developer_name}.
 The public developer profile is {getattr(settings, 'SAKATALENT_DEVELOPER_PROFILE_URL', 'https://moseskipsang.vercel.app/')}.
 
