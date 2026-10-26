@@ -28,6 +28,9 @@
         cursor: pointer;
         opacity: 0.85;
     }
+    .training-mobile-cta { padding-bottom: calc(0.75rem + env(safe-area-inset-bottom)); }
+    .training-target-dialog { max-height: min(90dvh, 48rem); }
+    .training-target-dialog::backdrop { background: rgb(2 6 23 / .68); backdrop-filter: blur(3px); }
     @media (max-width: 640px) {
         .training-workspace .championship-form { width: 100%; }
     }
@@ -35,7 +38,7 @@
 {% endblock %}
 
 {% block content %}
-<div class="training-workspace mx-auto max-w-7xl space-y-6 py-3 sm:space-y-7 sm:py-4">
+<div class="training-workspace mx-auto max-w-7xl space-y-6 px-3 py-3 pb-24 sm:space-y-7 sm:px-0 sm:py-4 lg:pb-0">
     <header class="relative overflow-hidden rounded-3xl bg-stadium-900 p-5 text-white shadow-xl sm:p-9">
         <div class="pointer-events-none absolute -right-12 -top-16 h-64 w-64 rounded-full border-[32px] border-white/5"></div>
         <div class="relative flex flex-col gap-5 sm:flex-row sm:items-end sm:justify-between">
@@ -164,22 +167,58 @@
             <p class="text-xs font-bold uppercase tracking-[0.15em] text-orange-600">Build your plan</p>
             <h2 class="mt-1 font-heading text-xl font-extrabold uppercase text-slate-900">Add an event target</h2>
             <p class="mt-2 text-xs leading-5 text-slate-500">Choose an event and set the time you want to reach by competition day.</p>
-            <form method="post" class="mt-5 space-y-4">
-                {% csrf_token %}<input type="hidden" name="action" value="add_target">
-                {% for field in target_form.visible_fields %}
-                <div>
-                    <label for="{{ field.id_for_label }}" class="mb-1.5 block text-[10px] font-bold uppercase tracking-wider text-slate-600">{{ field.label }}</label>
-                    {{ field }}
-                    {% if field.help_text %}<p class="mt-1 text-[11px] text-slate-500">{{ field.help_text }}</p>{% endif %}
-                    {% for error in field.errors %}<p class="mt-1 text-xs text-rose-600">{{ error }}</p>{% endfor %}
-                </div>
-                {% endfor %}
-                <button class="w-full rounded-xl bg-energy px-4 py-3 text-xs font-extrabold uppercase tracking-wider text-white transition hover:bg-energy-hover">Set event target</button>
-            </form>
+            <button type="button" data-open-target-dialog class="mt-5 w-full rounded-xl bg-energy px-4 py-3 text-xs font-extrabold uppercase tracking-wider text-white transition hover:bg-energy-hover focus:outline-none focus:ring-2 focus:ring-orange-400 focus:ring-offset-2">Add event target</button>
             <div class="mt-5 rounded-xl bg-orange-50 p-3 text-[11px] leading-5 text-orange-900">
                 Training targets and sessions are for your preparation only. Official results must still be submitted separately for verification.
             </div>
         </aside>
     </div>
+
+    <div class="training-mobile-cta fixed inset-x-0 bottom-0 z-40 border-t border-slate-200 bg-white/95 px-3 pt-3 shadow-[0_-8px_24px_rgba(15,23,42,0.12)] backdrop-blur lg:hidden">
+        <button type="button" data-open-target-dialog class="mx-auto flex w-full max-w-3xl items-center justify-center gap-2 rounded-xl bg-energy px-4 py-3.5 text-sm font-extrabold uppercase tracking-wide text-white shadow-lg shadow-orange-950/15 transition hover:bg-energy-hover focus:outline-none focus:ring-2 focus:ring-orange-400 focus:ring-offset-2">
+            <span class="text-lg leading-none" aria-hidden="true">+</span> Add event target
+        </button>
+    </div>
+
+    <dialog id="training-target-dialog" data-open-on-load="{{ target_form.errors|yesno:'true,false' }}" class="training-target-dialog m-auto w-[calc(100%-1.5rem)] max-w-xl overflow-y-auto rounded-2xl border-0 bg-white p-0 shadow-2xl">
+        <div class="flex items-start justify-between gap-4 border-b border-slate-100 px-5 py-4 sm:px-6">
+            <div>
+                <p class="text-[10px] font-extrabold uppercase tracking-[0.15em] text-orange-600">Build your plan</p>
+                <h2 class="mt-1 font-heading text-xl font-extrabold uppercase text-slate-900">Add an event target</h2>
+                <p class="mt-1 text-xs leading-5 text-slate-500">Choose an event and set the time you want to reach by competition day.</p>
+            </div>
+            <button type="button" id="close-training-target-dialog" class="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg border border-slate-200 text-slate-500 transition hover:bg-slate-50 hover:text-slate-900 focus:outline-none focus:ring-2 focus:ring-orange-400" aria-label="Close add target form">&times;</button>
+        </div>
+        <form method="post" class="space-y-4 p-5 sm:p-6">
+            {% csrf_token %}<input type="hidden" name="action" value="add_target">
+            {% for field in target_form.visible_fields %}
+            <div>
+                <label for="{{ field.id_for_label }}" class="mb-1.5 block text-[10px] font-bold uppercase tracking-wider text-slate-600">{{ field.label }}</label>
+                {{ field }}
+                {% if field.help_text %}<p class="mt-1 text-[11px] text-slate-500">{{ field.help_text }}</p>{% endif %}
+                {% for error in field.errors %}<p class="mt-1 text-xs text-rose-600">{{ error }}</p>{% endfor %}
+            </div>
+            {% endfor %}
+            <button class="w-full rounded-xl bg-energy px-4 py-3 text-xs font-extrabold uppercase tracking-wider text-white transition hover:bg-energy-hover">Set event target</button>
+            <p class="rounded-xl bg-orange-50 p-3 text-[11px] leading-5 text-orange-900">Training targets and sessions are for your preparation only. Official results must still be submitted separately for verification.</p>
+        </form>
+    </dialog>
 </div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+(() => {
+    const dialog = document.getElementById('training-target-dialog');
+    if (!dialog || typeof dialog.showModal !== 'function') return;
+    const openButtons = document.querySelectorAll('[data-open-target-dialog]');
+    const closeButton = document.getElementById('close-training-target-dialog');
+    openButtons.forEach(button => button.addEventListener('click', () => dialog.showModal()));
+    closeButton.addEventListener('click', () => dialog.close());
+    dialog.addEventListener('click', event => {
+        if (event.target === dialog) dialog.close();
+    });
+    if (dialog.dataset.openOnLoad === 'true') dialog.showModal();
+})();
+</script>
 {% endblock %}
