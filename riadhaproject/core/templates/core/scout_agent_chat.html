@@ -28,21 +28,21 @@
     @media (prefers-reduced-motion: reduce) { .typing-dots span, .scout-smoke { animation: none; } .scout-smoke { opacity: .3; } }
 </style>{% endcompress %}
 
-<section class="scout-chat-shell mx-auto flex w-full max-w-5xl flex-col overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-xl shadow-slate-900/10 sm:rounded-3xl" aria-label="Scout AI conversation">
+<section class="scout-chat-shell mx-auto flex w-full max-w-5xl flex-col overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-xl shadow-slate-900/10 sm:rounded-3xl" aria-label="Sotet AI conversation">
     <header class="flex shrink-0 items-center gap-3 bg-slate-900 px-4 py-3.5 text-white sm:gap-4 sm:px-8 sm:py-5">
         <img src="{% static 'core/images/scout-lamp.png' %}" alt="" class="h-8 w-14 shrink-0 object-contain sm:h-10 sm:w-16">
-        <div class="min-w-0"><p class="text-[10px] font-bold uppercase tracking-[.16em] text-orange-300 sm:text-xs sm:tracking-[.2em]">SakaTalent assistant</p><h1 id="scout-agent-title" class="mt-0.5 text-xl font-extrabold sm:mt-1 sm:text-2xl">Scout AI</h1><p class="mt-0.5 hidden text-xs text-slate-300 sm:block">Your athletics scouting companion</p></div>
+        <div class="min-w-0"><p class="text-[10px] font-bold uppercase tracking-[.16em] text-orange-300 sm:text-xs sm:tracking-[.2em]">SakaTalent assistant</p><h1 id="scout-agent-title" class="mt-0.5 text-xl font-extrabold sm:mt-1 sm:text-2xl">Sotet AI</h1><p class="mt-0.5 hidden text-xs text-slate-300 sm:block">Your athletics scouting companion</p></div>
         <span id="chat-verified-badge" class="ml-auto inline-flex items-center gap-1.5 rounded-full border border-emerald-400/30 bg-emerald-400/10 px-2.5 py-1 text-[10px] font-semibold text-emerald-300 sm:px-3 sm:text-xs"><span class="h-1.5 w-1.5 rounded-full bg-emerald-400"></span>Verified data</span>
-        <button type="button" id="scout-agent-close" class="scout-agent-close ml-auto hidden h-9 w-9 shrink-0 items-center justify-center rounded-lg border border-white/15 text-slate-200 transition hover:bg-white/10 hover:text-white focus:outline-none focus:ring-2 focus:ring-orange-400" aria-label="Close Scout AI chat" title="Close chat">
+        <button type="button" id="scout-agent-close" class="scout-agent-close ml-auto hidden h-9 w-9 shrink-0 items-center justify-center rounded-lg border border-white/15 text-slate-200 transition hover:bg-white/10 hover:text-white focus:outline-none focus:ring-2 focus:ring-orange-400" aria-label="Close Sotet AI chat" title="Close chat">
             <svg class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 6l12 12M18 6L6 18"/></svg>
         </button>
     </header>
-    <div id="chat-messages" class="scout-chat-messages flex min-h-0 flex-1 flex-col gap-4 overflow-x-hidden overflow-y-auto bg-gradient-to-b from-slate-50 to-white p-3.5 sm:gap-5 sm:p-7 lg:p-8" role="log" aria-label="Conversation with Scout AI" aria-live="polite" aria-relevant="additions text">
+    <div id="chat-messages" class="scout-chat-messages flex min-h-0 flex-1 flex-col gap-4 overflow-x-hidden overflow-y-auto bg-gradient-to-b from-slate-50 to-white p-3.5 sm:gap-5 sm:p-7 lg:p-8" role="log" aria-label="Conversation with Sotet AI" aria-live="polite" aria-relevant="additions text">
         {% if not scout_chat_history %}
         <div class="flex max-w-full items-start gap-2.5 self-start sm:gap-3">
             <img src="{% static 'core/images/scout-lamp.png' %}" alt="" class="h-7 w-12 shrink-0 object-contain sm:h-8 sm:w-14">
             <div class="min-w-0 max-w-[calc(100%_-_2.75rem)] rounded-2xl rounded-tl-sm border border-slate-200 bg-white px-4 py-4 text-[13px] leading-5 text-slate-700 shadow-sm sm:max-w-[88%] sm:px-5 sm:py-4 sm:text-sm sm:leading-6">
-                <p class="font-semibold text-slate-900">Hi, I’m Scout AI.</p>
+                <p class="font-semibold text-slate-900">Hi, I’m Sotet AI.</p>
                 <p class="mt-1">I can compare approved performances, find athletes by county or event, review an athlete’s results, and explore race results. Choose a prompt or ask your own question.</p>
                 <p class="mt-4 text-[10px] font-bold uppercase tracking-[.16em] text-slate-400 sm:text-[11px]">Try asking</p>
                 <div class="mt-2.5 flex gap-2 overflow-x-auto pb-1 sm:flex-wrap sm:overflow-visible">
@@ -57,16 +57,16 @@
     </div>
     <form id="chat-form" class="shrink-0 border-t border-slate-200 bg-white p-3 sm:px-5 sm:py-4">
         {% csrf_token %}
-        <label for="chat-question" class="sr-only">Message Scout AI</label>
+        <label for="chat-question" class="sr-only">Message Sotet AI</label>
         <div class="flex items-end gap-2 rounded-2xl border border-slate-200 bg-slate-50 p-1.5 shadow-sm transition focus-within:border-orange-300 focus-within:bg-white focus-within:ring-2 focus-within:ring-orange-100 sm:gap-3 sm:rounded-3xl sm:p-2">
-            <textarea id="chat-question" rows="1" maxlength="500" required placeholder="Ask Scout anything about SakaTalent…" class="max-h-36 min-h-11 min-w-0 flex-1 resize-none border-0 bg-transparent px-3 py-3 text-sm leading-5 text-slate-800 outline-none placeholder:text-slate-400 focus:border-0 focus:bg-transparent focus:outline-none focus:ring-0 sm:px-4" aria-describedby="chat-input-hint"></textarea>
+            <textarea id="chat-question" rows="1" maxlength="500" required placeholder="Ask Sotet anything about SakaTalent…" class="max-h-36 min-h-11 min-w-0 flex-1 resize-none border-0 bg-transparent px-3 py-3 text-sm leading-5 text-slate-800 outline-none placeholder:text-slate-400 focus:border-0 focus:bg-transparent focus:outline-none focus:ring-0 sm:px-4" aria-describedby="chat-input-hint"></textarea>
             <button id="chat-submit" type="submit" aria-label="Send message" title="Send message" class="inline-flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-orange-500 text-white shadow-sm transition hover:bg-orange-600 focus:outline-none focus:ring-2 focus:ring-orange-400 focus:ring-offset-2 disabled:cursor-wait disabled:opacity-50 sm:h-12 sm:w-12 sm:rounded-2xl">
                 <svg class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 12h14m-7-7l7 7-7 7"/></svg>
             </button>
         </div>
         <div id="chat-input-hint" class="mt-2 flex flex-wrap items-center justify-between gap-x-3 gap-y-1 px-1 text-[10px] leading-4 text-slate-400 sm:text-xs">
             <span>Enter to send <span class="text-slate-300">·</span> Shift + Enter for a new line</span>
-            <span>Scout uses approved race results</span>
+            <span>Sotet uses approved race results</span>
         </div>
     </form>
 </section>
@@ -91,7 +91,7 @@
         row.className = `flex w-full items-start gap-2.5 sm:gap-3 ${isUser ? 'justify-end' : 'justify-start'}`;
         const label = document.createElement('span');
         label.className = 'sr-only';
-        label.textContent = isUser ? 'You: ' : 'Scout AI: ';
+        label.textContent = isUser ? 'You: ' : 'Sotet AI: ';
         const avatar = document.createElement('span');
         avatar.className = isUser
             ? 'mt-0.5 flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-slate-200 text-slate-600 ring-1 ring-inset ring-slate-300 sm:h-9 sm:w-9'
@@ -122,7 +122,7 @@
         const bubble = addMessage('', 'agent');
         bubble.dataset.replyClassName = bubble.className;
         bubble.className = 'scout-typing-stage';
-        bubble.setAttribute('aria-label', 'Scout AI is typing');
+        bubble.setAttribute('aria-label', 'Sotet AI is typing');
         bubble.parentElement.querySelector('.scout-message-avatar')?.classList.add('hidden');
         bubble.innerHTML = '<img class="scout-typing-lamp" src="' + scoutLampUrl + '" alt=""><span class="scout-smoke" aria-hidden="true"></span><span class="scout-smoke" aria-hidden="true"></span><span class="scout-smoke" aria-hidden="true"></span><span class="typing-dots scout-typing-dots" aria-hidden="true"><span></span><span></span><span></span></span>';
         return bubble;
@@ -186,6 +186,16 @@
         const lines = text.split(/\r?\n/);
         let lineIndex = 0;
         while (lineIndex < lines.length) {
+            const headingMatch = lines[lineIndex].match(/^(#{1,4})\s+(.+)$/);
+            if (headingMatch) {
+                const headingLevel = headingMatch[1].length;
+                const heading = document.createElement(`h${headingLevel}`);
+                heading.className = `my-1 font-bold text-slate-900 ${headingLevel < 3 ? 'text-base' : 'text-sm'}`;
+                appendInlineMarkdown(heading, headingMatch[2]);
+                bubble.appendChild(heading);
+                lineIndex++;
+                continue;
+            }
             if (lineIndex + 1 < lines.length && lines[lineIndex].includes('|') && isTableSeparator(lines[lineIndex + 1])) {
                 let tableEnd = lineIndex + 2;
                 while (tableEnd < lines.length && lines[tableEnd].includes('|') && lines[tableEnd].trim()) tableEnd++;
@@ -240,7 +250,7 @@
             messages.setAttribute('aria-live', 'polite');
             messages.scrollTop = messages.scrollHeight;
         } catch (error) {
-            console.warn('Could not restore recent Scout conversation.', error);
+            console.warn('Could not restore recent Sotet conversation.', error);
         }
     }
 
@@ -288,7 +298,7 @@
             answer = data.answer || data.error || 'I could not process that question. Please try again.';
             await new Promise(resolve => window.setTimeout(resolve, 450));
         } catch (error) {
-            answer = 'I could not reach the scouting service. Please try again.';
+            answer = 'I could not reach Sotet AI. Please try again.';
         } finally {
             submit.disabled = false;
             input.focus();

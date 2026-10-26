@@ -72,7 +72,7 @@ CSRF_TRUSTED_ORIGINS = [
     if origin.strip()
 ]
 
-# Optional language model used to explain verified Scout AI results.
+# Optional language model used by Sotet AI to explain verified results.
 OPENAI_API_KEY = os.environ.get('OPENAI_API_KEY', '').strip()
 OPENAI_MODEL = os.environ.get('OPENAI_MODEL', 'gpt-6-astra').strip()
 SAKATALENT_DEVELOPER = os.environ.get(
