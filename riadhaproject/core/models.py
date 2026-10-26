@@ -182,7 +182,10 @@ class TrainingTarget(models.Model):
     class Meta:
         ordering = ('event__name',)
         constraints = [
-            models.UniqueConstraint(fields=('plan', 'event'), name='unique_training_target_per_event'),
+            models.UniqueConstraint(
+                fields=('plan', 'event', 'competition_date'),
+                name='unique_training_target_per_event_date',
+            ),
         ]
 
     def __str__(self):

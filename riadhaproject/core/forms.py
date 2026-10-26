@@ -1,6 +1,7 @@
 from django import forms
 from django.contrib.auth.forms import UserCreationForm
 from decimal import Decimal, ROUND_HALF_UP
+from datetime import timedelta
 
 from django.contrib.auth.models import User
 from django.utils import timezone
@@ -223,13 +224,33 @@ class TrainingTargetForm(forms.ModelForm):
         super().__init__(*args, **kwargs)
         self.fields['event'].queryset = Event.objects.order_by('name')
         if not self.is_bound:
-            self.fields['competition_date'].initial = plan.championship_date
+            self.fields['competition_date'].initial = max(
+                plan.championship_date,
+                timezone.localdate() + timedelta(days=1),
+            )
+
+    def clean_competition_date(self):
+        competition_date = self.cleaned_data['competition_date']
+        if competition_date < timezone.localdate():
+            raise forms.ValidationError('Choose today or a future competition date.')
+        return competition_date
 
     def clean_event(self):
-        event = self.cleaned_data['event']
-        if self.plan.targets.filter(event=event).exists():
-            raise forms.ValidationError('You already have a target for this event in this competition plan.')
-        return event
+        return self.cleaned_data['event']
+
+    def clean(self):
+        cleaned_data = super().clean()
+        event = cleaned_data.get('event')
+        competition_date = cleaned_data.get('competition_date')
+        if event and competition_date and self.plan.targets.filter(
+            event=event,
+            competition_date=competition_date,
+        ).exists():
+            self.add_error(
+                'competition_date',
+                'You already have a target for this event on that competition date.',
+            )
+        return cleaned_data
 
 
 class TrainingResultForm(forms.ModelForm):

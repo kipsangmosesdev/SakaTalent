@@ -1,4 +1,4 @@
-{% load compress %}
+{% load compress static %}
 {% compress css %}<style>
     .scout-agent-dialog:not([open]) { display: none; }
     .scout-chat-shell { height: min(780px, calc(100dvh - 14rem)); min-height: 360px; }
@@ -23,9 +23,7 @@
 
 <section class="scout-chat-shell mx-auto flex w-full max-w-5xl flex-col overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-xl shadow-slate-900/10 sm:rounded-3xl" aria-label="Scout AI conversation">
     <header class="flex shrink-0 items-center gap-3 bg-slate-900 px-4 py-3.5 text-white sm:gap-4 sm:px-8 sm:py-5">
-        <span class="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-orange-500 shadow-lg shadow-orange-950/30 sm:h-12 sm:w-12 sm:rounded-2xl" aria-hidden="true">
-            <svg class="h-6 w-6 sm:h-7 sm:w-7" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8" d="M12 3l1.8 5.2L19 10l-5.2 1.8L12 17l-1.8-5.2L5 10l5.2-1.8L12 3zm6 11l1.2 2.8L22 18l-2.8 1.2L18 22l-1.2-2.8L14 18l2.8-1.2L18 14z"/></svg>
-        </span>
+        <img src="{% static 'core/images/scout-avatar.svg' %}" alt="" class="h-10 w-10 shrink-0 rounded-xl shadow-lg shadow-orange-950/30 sm:h-12 sm:w-12 sm:rounded-2xl">
         <div class="min-w-0"><p class="text-[10px] font-bold uppercase tracking-[.16em] text-orange-300 sm:text-xs sm:tracking-[.2em]">SakaTalent assistant</p><h1 id="scout-agent-title" class="mt-0.5 text-xl font-extrabold sm:mt-1 sm:text-2xl">Scout AI</h1><p class="mt-0.5 hidden text-xs text-slate-300 sm:block">Your athletics scouting companion</p></div>
         <span id="chat-verified-badge" class="ml-auto inline-flex items-center gap-1.5 rounded-full border border-emerald-400/30 bg-emerald-400/10 px-2.5 py-1 text-[10px] font-semibold text-emerald-300 sm:px-3 sm:text-xs"><span class="h-1.5 w-1.5 rounded-full bg-emerald-400"></span>Verified data</span>
         <button type="button" id="scout-agent-close" class="scout-agent-close ml-auto hidden h-9 w-9 shrink-0 items-center justify-center rounded-lg border border-white/15 text-slate-200 transition hover:bg-white/10 hover:text-white focus:outline-none focus:ring-2 focus:ring-orange-400" aria-label="Close Scout AI chat" title="Close chat">
@@ -35,9 +33,7 @@
     <div id="chat-messages" class="scout-chat-messages flex min-h-0 flex-1 flex-col gap-4 overflow-x-hidden overflow-y-auto bg-gradient-to-b from-slate-50 to-white p-3.5 sm:gap-5 sm:p-7 lg:p-8" role="log" aria-label="Conversation with Scout AI" aria-live="polite" aria-relevant="additions text">
         {% if not scout_chat_history %}
         <div class="flex max-w-full items-start gap-2.5 self-start sm:gap-3">
-            <span class="flex h-8 w-8 shrink-0 items-center justify-center rounded-xl bg-orange-500 text-white shadow-sm sm:h-9 sm:w-9" aria-hidden="true">
-                <svg class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8" d="M12 3l1.8 5.2L19 10l-5.2 1.8L12 17l-1.8-5.2L5 10l5.2-1.8L12 3zm6 11l1.2 2.8L22 18l-2.8 1.2L18 22l-1.2-2.8L14 18l2.8-1.2L18 14z"/></svg>
-            </span>
+            <img src="{% static 'core/images/scout-avatar.svg' %}" alt="" class="h-8 w-8 shrink-0 rounded-xl shadow-sm sm:h-9 sm:w-9">
             <div class="min-w-0 max-w-[calc(100%_-_2.75rem)] rounded-2xl rounded-tl-sm border border-slate-200 bg-white px-4 py-4 text-[13px] leading-5 text-slate-700 shadow-sm sm:max-w-[88%] sm:px-5 sm:py-4 sm:text-sm sm:leading-6">
                 <p class="font-semibold text-slate-900">Hi, I’m Scout AI.</p>
                 <p class="mt-1">I can compare approved performances, find athletes by county or event, review an athlete’s results, and explore race results. Choose a prompt or ask your own question.</p>
@@ -91,11 +87,17 @@
         const avatar = document.createElement('span');
         avatar.className = isUser
             ? 'mt-0.5 flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-slate-200 text-slate-600 ring-1 ring-inset ring-slate-300 sm:h-9 sm:w-9'
-            : 'mt-0.5 flex h-8 w-8 shrink-0 items-center justify-center rounded-xl bg-orange-500 text-white shadow-sm sm:h-9 sm:w-9';
+            : 'mt-0.5 block h-8 w-8 shrink-0 rounded-xl shadow-sm sm:h-9 sm:w-9';
         avatar.setAttribute('aria-hidden', 'true');
-        avatar.innerHTML = isUser
-            ? '<svg class="h-5 w-5" viewBox="0 0 24 24" fill="currentColor"><path d="M12 12a4.25 4.25 0 100-8.5A4.25 4.25 0 0012 12zm0 2c-4.06 0-7.25 2.12-7.25 4.75v1.5h14.5v-1.5C19.25 16.12 16.06 14 12 14z"/></svg>'
-            : '<svg class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8" d="M12 3l1.8 5.2L19 10l-5.2 1.8L12 17l-1.8-5.2L5 10l5.2-1.8L12 3zm6 11l1.2 2.8L22 18l-2.8 1.2L18 22l-1.2-2.8L14 18l2.8-1.2L18 14z"/></svg>';
+        if (isUser) {
+            avatar.innerHTML = '<svg class="h-5 w-5" viewBox="0 0 24 24" fill="currentColor"><path d="M12 12a4.25 4.25 0 100-8.5A4.25 4.25 0 0012 12zm0 2c-4.06 0-7.25 2.12-7.25 4.75v1.5h14.5v-1.5C19.25 16.12 16.06 14 12 14z"/></svg>';
+        } else {
+            const scoutAvatar = document.createElement('img');
+            scoutAvatar.src = "{% static 'core/images/scout-avatar.svg' %}";
+            scoutAvatar.alt = '';
+            scoutAvatar.className = 'h-full w-full rounded-xl';
+            avatar.appendChild(scoutAvatar);
+        }
         const bubble = document.createElement('div');
         bubble.className = isUser
             ? 'max-w-[calc(100%_-_2.75rem)] break-words rounded-2xl rounded-tr-sm bg-slate-900 px-3.5 py-2.5 text-[13px] leading-5 text-white shadow-sm whitespace-pre-wrap sm:max-w-[82%] sm:px-4 sm:py-3 sm:text-sm sm:leading-6'
