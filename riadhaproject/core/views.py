@@ -298,6 +298,9 @@ def training_dashboard(request):
                 pk=request.POST.get('target_id'),
                 plan=plan,
             )
+            if target.competition_date < today:
+                messages.error(request, 'The competition date has passed, so session logging for this target is closed.')
+                return redirect('training_dashboard')
             result_form = TrainingResultForm(request.POST, target=target)
             if result_form.is_valid():
                 training_result = result_form.save(commit=False)
