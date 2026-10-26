@@ -242,13 +242,18 @@ class TrainingTargetForm(forms.ModelForm):
         cleaned_data = super().clean()
         event = cleaned_data.get('event')
         competition_date = cleaned_data.get('competition_date')
-        if event and competition_date and self.plan.targets.filter(
-            event=event,
-            competition_date=competition_date,
-        ).exists():
+        if event and competition_date:
+            active_target = self.plan.targets.filter(
+                event=event,
+                competition_date__gte=timezone.localdate(),
+            ).order_by('competition_date').first()
+        else:
+            active_target = None
+        if active_target:
             self.add_error(
-                'competition_date',
-                'You already have a target for this event on that competition date.',
+                'event',
+                f'You already have an upcoming target for this event through '
+                f'{active_target.competition_date:%b %d, %Y}. You can add another after that date has passed.',
             )
         return cleaned_data
 
