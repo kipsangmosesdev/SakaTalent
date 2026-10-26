@@ -9,6 +9,13 @@
     .typing-dots span:nth-child(2) { animation-delay: .15s; }
     .typing-dots span:nth-child(3) { animation-delay: .3s; }
     @keyframes scout-dot { 0%, 60%, 100% { transform: translateY(0); opacity: .45; } 30% { transform: translateY(-4px); opacity: 1; } }
+    .scout-typing-stage { position: relative; display: flex; width: 190px; height: 112px; align-items: center; justify-content: center; overflow: visible; border: 1px solid #dbe4ec; border-radius: 1rem; background: radial-gradient(ellipse at 48% 95%, #f5f3e8 0%, #fff 68%); }
+    .scout-typing-lamp { width: 160px; height: 106px; object-fit: contain; filter: drop-shadow(0 5px 5px rgb(15 23 42 / .12)); }
+    .scout-smoke { position: absolute; z-index: 1; right: 20px; top: 34px; width: 17px; height: 12px; border-radius: 999px; background: radial-gradient(ellipse, rgb(118 205 188 / .88), rgb(137 187 184 / .48) 58%, transparent 76%); filter: blur(1px); opacity: 0; animation: scout-smoke-rise 1.7s ease-out infinite; }
+    .scout-smoke:nth-child(3) { animation-delay: .55s; transform: scale(.76); }
+    .scout-smoke:nth-child(4) { animation-delay: 1.1s; transform: scale(.9); }
+    @keyframes scout-smoke-rise { 0% { opacity: 0; transform: translate(0, 4px) scale(.55); } 18% { opacity: .72; } 100% { opacity: 0; transform: translate(-13px, -37px) scale(1.55); } }
+    .scout-typing-dots { position: absolute; right: 12px; bottom: 9px; }
     .scout-agent-dialog .scout-chat-shell { height: min(760px, calc(94dvh - 2rem)); min-height: 360px; }
     .scout-agent-dialog .scout-agent-close { display: inline-flex; }
     .scout-agent-dialog #chat-verified-badge { display: none; }
@@ -18,12 +25,12 @@
         .scout-agent-dialog .scout-chat-shell { height: calc(94dvh - 2rem); min-height: min(360px, calc(94dvh - 2rem)); }
         .scout-agent-dialog { width: calc(100% - 1rem); }
     }
-    @media (prefers-reduced-motion: reduce) { .typing-dots span { animation: none; } }
+    @media (prefers-reduced-motion: reduce) { .typing-dots span, .scout-smoke { animation: none; } .scout-smoke { opacity: .3; } }
 </style>{% endcompress %}
 
 <section class="scout-chat-shell mx-auto flex w-full max-w-5xl flex-col overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-xl shadow-slate-900/10 sm:rounded-3xl" aria-label="Scout AI conversation">
     <header class="flex shrink-0 items-center gap-3 bg-slate-900 px-4 py-3.5 text-white sm:gap-4 sm:px-8 sm:py-5">
-        <img src="{% static 'core/images/scout-avatar.svg' %}" alt="" class="h-10 w-10 shrink-0 rounded-xl shadow-lg shadow-orange-950/30 sm:h-12 sm:w-12 sm:rounded-2xl">
+        <img src="{% static 'core/images/scout-lamp.png' %}" alt="" class="h-8 w-14 shrink-0 object-contain sm:h-10 sm:w-16">
         <div class="min-w-0"><p class="text-[10px] font-bold uppercase tracking-[.16em] text-orange-300 sm:text-xs sm:tracking-[.2em]">SakaTalent assistant</p><h1 id="scout-agent-title" class="mt-0.5 text-xl font-extrabold sm:mt-1 sm:text-2xl">Scout AI</h1><p class="mt-0.5 hidden text-xs text-slate-300 sm:block">Your athletics scouting companion</p></div>
         <span id="chat-verified-badge" class="ml-auto inline-flex items-center gap-1.5 rounded-full border border-emerald-400/30 bg-emerald-400/10 px-2.5 py-1 text-[10px] font-semibold text-emerald-300 sm:px-3 sm:text-xs"><span class="h-1.5 w-1.5 rounded-full bg-emerald-400"></span>Verified data</span>
         <button type="button" id="scout-agent-close" class="scout-agent-close ml-auto hidden h-9 w-9 shrink-0 items-center justify-center rounded-lg border border-white/15 text-slate-200 transition hover:bg-white/10 hover:text-white focus:outline-none focus:ring-2 focus:ring-orange-400" aria-label="Close Scout AI chat" title="Close chat">
@@ -33,7 +40,7 @@
     <div id="chat-messages" class="scout-chat-messages flex min-h-0 flex-1 flex-col gap-4 overflow-x-hidden overflow-y-auto bg-gradient-to-b from-slate-50 to-white p-3.5 sm:gap-5 sm:p-7 lg:p-8" role="log" aria-label="Conversation with Scout AI" aria-live="polite" aria-relevant="additions text">
         {% if not scout_chat_history %}
         <div class="flex max-w-full items-start gap-2.5 self-start sm:gap-3">
-            <img src="{% static 'core/images/scout-avatar.svg' %}" alt="" class="h-8 w-8 shrink-0 rounded-xl shadow-sm sm:h-9 sm:w-9">
+            <img src="{% static 'core/images/scout-lamp.png' %}" alt="" class="h-7 w-12 shrink-0 object-contain sm:h-8 sm:w-14">
             <div class="min-w-0 max-w-[calc(100%_-_2.75rem)] rounded-2xl rounded-tl-sm border border-slate-200 bg-white px-4 py-4 text-[13px] leading-5 text-slate-700 shadow-sm sm:max-w-[88%] sm:px-5 sm:py-4 sm:text-sm sm:leading-6">
                 <p class="font-semibold text-slate-900">Hi, I’m Scout AI.</p>
                 <p class="mt-1">I can compare approved performances, find athletes by county or event, review an athlete’s results, and explore race results. Choose a prompt or ask your own question.</p>
@@ -72,6 +79,7 @@
     const input = document.getElementById('chat-question');
     const messages = document.getElementById('chat-messages');
     const submit = document.getElementById('chat-submit');
+    const scoutLampUrl = "{% static 'core/images/scout-lamp.png' %}";
     const csrf = form.querySelector('[name=csrfmiddlewaretoken]').value;
     const dialog = document.getElementById('scout-agent-dialog');
     const closeButton = document.getElementById('scout-agent-close');
@@ -87,15 +95,15 @@
         const avatar = document.createElement('span');
         avatar.className = isUser
             ? 'mt-0.5 flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-slate-200 text-slate-600 ring-1 ring-inset ring-slate-300 sm:h-9 sm:w-9'
-            : 'mt-0.5 block h-8 w-8 shrink-0 rounded-xl shadow-sm sm:h-9 sm:w-9';
+            : 'scout-message-avatar mt-0.5 block h-7 w-12 shrink-0 object-contain sm:h-8 sm:w-14';
         avatar.setAttribute('aria-hidden', 'true');
         if (isUser) {
             avatar.innerHTML = '<svg class="h-5 w-5" viewBox="0 0 24 24" fill="currentColor"><path d="M12 12a4.25 4.25 0 100-8.5A4.25 4.25 0 0012 12zm0 2c-4.06 0-7.25 2.12-7.25 4.75v1.5h14.5v-1.5C19.25 16.12 16.06 14 12 14z"/></svg>';
         } else {
             const scoutAvatar = document.createElement('img');
-            scoutAvatar.src = "{% static 'core/images/scout-avatar.svg' %}";
+            scoutAvatar.src = scoutLampUrl;
             scoutAvatar.alt = '';
-            scoutAvatar.className = 'h-full w-full rounded-xl';
+            scoutAvatar.className = 'h-full w-full object-contain';
             avatar.appendChild(scoutAvatar);
         }
         const bubble = document.createElement('div');
@@ -112,8 +120,11 @@
     };
     const showTyping = () => {
         const bubble = addMessage('', 'agent');
+        bubble.dataset.replyClassName = bubble.className;
+        bubble.className = 'scout-typing-stage';
         bubble.setAttribute('aria-label', 'Scout AI is typing');
-        bubble.innerHTML = '<span class="typing-dots" aria-hidden="true"><span></span><span></span><span></span></span>';
+        bubble.parentElement.querySelector('.scout-message-avatar')?.classList.add('hidden');
+        bubble.innerHTML = '<img class="scout-typing-lamp" src="' + scoutLampUrl + '" alt=""><span class="scout-smoke" aria-hidden="true"></span><span class="scout-smoke" aria-hidden="true"></span><span class="scout-smoke" aria-hidden="true"></span><span class="typing-dots scout-typing-dots" aria-hidden="true"><span></span><span></span><span></span></span>';
         return bubble;
     };
     const appendInlineMarkdown = (parent, text) => {
@@ -190,6 +201,9 @@
     };
     const revealReply = (bubble, text) => new Promise(resolve => {
         bubble.removeAttribute('aria-label');
+        bubble.className = bubble.dataset.replyClassName || 'max-w-[calc(100%_-_2.75rem)] break-words rounded-2xl rounded-tl-sm border border-slate-200 bg-white px-3.5 py-2.5 text-[13px] leading-5 text-slate-700 shadow-sm whitespace-pre-wrap sm:max-w-[88%] sm:px-4 sm:py-3 sm:text-sm sm:leading-6';
+        delete bubble.dataset.replyClassName;
+        bubble.parentElement.querySelector('.scout-message-avatar')?.classList.remove('hidden');
         bubble.textContent = '';
         const words = text.split(/(\s+)/).filter(part => part.length);
         const wordCount = words.filter(part => !/^\s+$/.test(part)).length;
