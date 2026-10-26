@@ -75,9 +75,7 @@ CSRF_TRUSTED_ORIGINS = [
 # Optional language model used by Sotet AI to explain verified results.
 OPENAI_API_KEY = os.environ.get('OPENAI_API_KEY', '').strip()
 OPENAI_MODEL = os.environ.get('OPENAI_MODEL', 'gpt-6-astra').strip()
-SAKATALENT_DEVELOPER = os.environ.get(
-    'SAKATALENT_DEVELOPER', 'Moses Kipsang (KITI ICT Department team contributor)'
-).strip()
+SAKATALENT_DEVELOPER = 'Moses Kipsang (sole developer)'
 SAKATALENT_DEVELOPER_PROFILE_URL = os.environ.get(
     'SAKATALENT_DEVELOPER_PROFILE_URL', 'https://moseskipsang.vercel.app/'
 ).strip()
