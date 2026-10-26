@@ -193,7 +193,19 @@ class TrainingTarget(models.Model):
 
 
 class TrainingResult(models.Model):
-    """An athlete-recorded practice result; deliberately separate from Performance."""
+    """An athlete-recorded practice session; separate from official Performance."""
+
+    SESSION_TYPE_CHOICES = [
+        ('event_test', 'Full-event time trial'),
+        ('speed', 'Acceleration / top speed'),
+        ('speed_endurance', 'Speed endurance'),
+        ('intervals', 'Intervals'),
+        ('tempo', 'Tempo / steady run'),
+        ('easy', 'Easy / recovery'),
+        ('technique', 'Technique / event drills'),
+        ('strength', 'Strength / conditioning'),
+        ('other', 'Other session'),
+    ]
 
     target = models.ForeignKey(
         TrainingTarget,
@@ -201,12 +213,16 @@ class TrainingResult(models.Model):
         related_name='training_results',
     )
     training_date = models.DateField()
-    result = models.DecimalField(max_digits=10, decimal_places=2)
-    notes = models.CharField(max_length=240, blank=True)
+    session_type = models.CharField(max_length=20, choices=SESSION_TYPE_CHOICES, default='event_test')
+    result = models.DecimalField(max_digits=10, decimal_places=2, blank=True, null=True)
+    notes = models.TextField(blank=True)
     created_at = models.DateTimeField(auto_now_add=True)
 
     class Meta:
         ordering = ('-training_date', '-created_at')
 
     def __str__(self):
-        return f"{self.target.event} training result — {self.result}s on {self.training_date}"
+        label = self.get_session_type_display()
+        if self.result is not None:
+            label += f" ({self.result}s)"
+        return f"{self.target.event} {label} on {self.training_date}"

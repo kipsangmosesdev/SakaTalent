@@ -74,48 +74,64 @@
                             </div>
                             {% if target.competition_date < today %}
                                 <span class="rounded-full bg-amber-100 px-3 py-1.5 text-[10px] font-extrabold uppercase tracking-wider text-amber-800">Competition passed</span>
-                            {% elif target.latest_result and target.latest_result.result <= target.target_result %}
+                            {% elif target.latest_test_result and target.latest_test_result.result <= target.target_result %}
                                 <span class="rounded-full bg-emerald-100 px-3 py-1.5 text-[10px] font-extrabold uppercase tracking-wider text-emerald-800">Target reached</span>
                             {% else %}
                                 <span class="rounded-full bg-blue-50 px-3 py-1.5 text-[10px] font-extrabold uppercase tracking-wider text-blue-800">In progress</span>
                             {% endif %}
                         </div>
-                        <div class="mt-5 grid grid-cols-2 gap-3 sm:grid-cols-4">
+                        <div class="mt-5 grid grid-cols-2 gap-3 sm:grid-cols-3 xl:grid-cols-5">
                             <div class="rounded-xl bg-white p-3 ring-1 ring-slate-200/80">
                                 <p class="text-[9px] font-extrabold uppercase tracking-wider text-slate-500">Target time</p>
                                 <p class="mt-1 font-heading text-xl font-extrabold text-orange-600">{{ target.target_result|format_seconds }}</p>
                             </div>
                             <div class="rounded-xl bg-white p-3 ring-1 ring-slate-200/80">
-                                <p class="text-[9px] font-extrabold uppercase tracking-wider text-slate-500">Training best</p>
+                                <p class="text-[9px] font-extrabold uppercase tracking-wider text-slate-500">Best full-event test</p>
                                 <p class="mt-1 font-heading text-xl font-extrabold text-slate-900">{% if target.best_result %}{{ target.best_result.result|format_seconds }}{% else %}&mdash;{% endif %}</p>
                             </div>
                             <div class="rounded-xl bg-white p-3 ring-1 ring-slate-200/80">
-                                <p class="text-[9px] font-extrabold uppercase tracking-wider text-slate-500">Latest training</p>
-                                <p class="mt-1 font-heading text-xl font-extrabold text-slate-900">{% if target.latest_result %}{{ target.latest_result.result|format_seconds }}{% else %}&mdash;{% endif %}</p>
+                                <p class="text-[9px] font-extrabold uppercase tracking-wider text-slate-500">Latest full-event test</p>
+                                <p class="mt-1 font-heading text-xl font-extrabold text-slate-900">{% if target.latest_test_result %}{{ target.latest_test_result.result|format_seconds }}{% else %}&mdash;{% endif %}</p>
+                            </div>
+                            <div class="rounded-xl bg-white p-3 ring-1 ring-slate-200/80">
+                                <p class="text-[9px] font-extrabold uppercase tracking-wider text-slate-500">Latest session</p>
+                                <p class="mt-1 text-xs font-extrabold leading-5 text-slate-900">{% if target.latest_result %}{{ target.latest_result.get_session_type_display }}{% else %}&mdash;{% endif %}</p>
                             </div>
                             <div class="rounded-xl bg-white p-3 ring-1 ring-slate-200/80">
                                 <p class="text-[9px] font-extrabold uppercase tracking-wider text-slate-500">Sessions logged</p>
                                 <p class="mt-1 font-heading text-xl font-extrabold text-slate-900">{{ target.training_count }}</p>
                             </div>
                         </div>
-                        <div class="mt-4 rounded-xl px-4 py-3 text-sm leading-6 {% if target.latest_result and target.latest_result.result <= target.target_result %}bg-emerald-50 text-emerald-900{% elif target.competition_date < today %}bg-amber-50 text-amber-900{% else %}bg-blue-50 text-blue-900{% endif %}">
-                            {% if target.latest_result and target.latest_result.result <= target.target_result %}
-                                {% if target.latest_time_gap %}
-                                    <strong>Congratulations!</strong> Your latest session beat your target by {{ target.latest_time_gap|format_seconds }}. Keep it up!
+                        <div class="mt-4 rounded-xl px-4 py-3 text-sm leading-6 {% if target.latest_test_result and target.latest_test_result.result <= target.target_result %}bg-emerald-50 text-emerald-900{% elif target.competition_date < today %}bg-amber-50 text-amber-900{% else %}bg-blue-50 text-blue-900{% endif %}">
+                            {% if target.latest_test_result and target.latest_test_result.result <= target.target_result %}
+                                {% if target.latest_test_time_gap %}
+                                    <strong>Congratulations!</strong> Your latest full-event test beat your target by {{ target.latest_test_time_gap|format_seconds }}. Keep it up!
                                 {% else %}
-                                    <strong>Congratulations!</strong> Your latest session reached your target time. Keep it up!
+                                    <strong>Congratulations!</strong> Your latest full-event test reached your target time. Keep it up!
                                 {% endif %}
                             {% elif target.competition_date < today %}
-                                {% if target.latest_result %}
-                                    Competition date passed. Your latest session was {{ target.latest_time_gap|format_seconds }} over your target. Keep training for your next competition.
+                                {% if target.latest_test_result %}
+                                    Competition date passed. Your latest full-event test was {{ target.latest_test_time_gap|format_seconds }} over your target. Keep training for your next competition.
+                                {% elif target.training_count %}
+                                    Competition date passed. Your workouts remain in the log, but no full-event test was recorded to compare with this target.
                                 {% else %}
-                                    Competition date passed with no training times logged. Add a target for your next competition and keep training.
+                                    Competition date passed with no training sessions logged. Add a target for your next competition and keep training.
                                 {% endif %}
+                            {% elif target.latest_test_result %}
+                                You need to improve your latest full-event test by {{ target.latest_test_time_gap|format_seconds }} to reach your target by competition day.
                             {% elif target.latest_result %}
-                                You need to improve your latest time by {{ target.latest_time_gap|format_seconds }} to reach your target by competition day.
+                                Your latest session is {{ target.latest_result.get_session_type_display|lower }}. Workout times are not compared with your event target unless you record a full-event time trial.
                             {% else %}
-                                Log a training time to see how close you are to your target.
+                                Log workouts of different lengths as needed. Record a full-event time trial when you want to check progress against this target.
                             {% endif %}
+                        </div>
+
+                        <div class="mt-4 rounded-xl border border-indigo-100 bg-indigo-50/80 px-4 py-3 text-sm leading-6 text-indigo-950">
+                            <p class="text-[10px] font-extrabold uppercase tracking-wider text-indigo-700">{{ target.training_guidance.title }}</p>
+                            <p class="mt-1">{{ target.training_guidance.focus }}</p>
+                            <p class="mt-2 text-xs"><strong>Session ideas:</strong> {{ target.training_guidance.examples }}</p>
+                            <p class="mt-2 text-[11px] leading-5 text-indigo-800">{{ target.training_guidance.reminder }}</p>
+                            {% if target.training_guidance.source_url %}<a href="{{ target.training_guidance.source_url }}" target="_blank" rel="noopener noreferrer" class="mt-2 inline-flex text-xs font-bold text-indigo-700 underline decoration-indigo-300 underline-offset-2 hover:text-indigo-900">Read {{ target.training_guidance.source_label }}</a>{% endif %}
                         </div>
                     </div>
 
@@ -127,30 +143,31 @@
                                     {% for result in target.training_results.all %}
                                     <div class="flex min-w-0 items-center justify-between gap-3 rounded-xl bg-slate-50 px-3 py-2.5">
                                         <div class="min-w-0">
-                                            <p class="text-xs font-bold text-slate-800">{{ result.training_date|date:"M j, Y" }}</p>
-                                            {% if result.notes %}<p class="mt-0.5 truncate text-xs text-slate-500">{{ result.notes }}</p>{% endif %}
+                                            <p class="text-xs font-bold text-slate-800">{{ result.training_date|date:"M j, Y" }} · {{ result.get_session_type_display }}</p>
+                                            {% if result.notes %}<p class="mt-0.5 text-xs leading-5 text-slate-500">{{ result.notes }}</p>{% endif %}
                                         </div>
-                                        <span class="shrink-0 font-heading text-lg font-extrabold text-slate-900">{{ result.result|format_seconds }}</span>
+                                        {% if result.result %}<span class="shrink-0 font-heading text-lg font-extrabold text-slate-900">{{ result.result|format_seconds }}</span>{% endif %}
                                     </div>
                                     {% endfor %}
                                 </div>
                             {% else %}
-                                <p class="mt-3 rounded-xl border border-dashed border-slate-300 p-4 text-xs leading-5 text-slate-500">No training results yet. Log your first session to see your progress here.</p>
+                                <p class="mt-3 rounded-xl border border-dashed border-slate-300 p-4 text-xs leading-5 text-slate-500">No workouts logged yet. Add any training session here; it does not have to cover the full event distance.</p>
                             {% endif %}
                         </div>
 
                         {% if target.competition_date >= today %}
-                        <form method="post" class="min-w-0 space-y-3 rounded-2xl bg-slate-50 p-4">
+                        <form method="post" data-training-result-form class="min-w-0 space-y-3 rounded-2xl bg-slate-50 p-4">
                             {% csrf_token %}<input type="hidden" name="action" value="add_result"><input type="hidden" name="target_id" value="{{ target.pk }}">
                             <div>
-                                <h4 class="font-heading text-sm font-extrabold uppercase tracking-wide text-slate-800">Log a session</h4>
-                                <p class="mt-1 text-[11px] leading-4 text-slate-500">Private training record. This will not affect rankings.</p>
+                                <h4 class="font-heading text-sm font-extrabold uppercase tracking-wide text-slate-800">Log a workout</h4>
+                                <p class="mt-1 text-[11px] leading-4 text-slate-500">Record intervals, drills, recovery or a full-event test. Only a full-event test is compared with your target.</p>
                             </div>
                             {% with form=result_forms|get_item:target.pk %}
                                 {% for field in form.visible_fields %}
-                                <div>
+                                <div {% if field.name == 'result' %}data-event-test-time-field{% endif %}>
                                     <label for="{{ field.id_for_label }}" class="mb-1 block text-[10px] font-bold uppercase tracking-wider text-slate-600">{{ field.label }}</label>
                                     {{ field }}
+                                    {% if field.help_text %}<p class="mt-1 text-[11px] leading-4 text-slate-500">{{ field.help_text }}</p>{% endif %}
                                     {% for error in field.errors %}<p class="mt-1 text-xs text-rose-600">{{ error }}</p>{% endfor %}
                                 </div>
                                 {% endfor %}
@@ -216,6 +233,21 @@
 <script>
 (() => {
     const dialog = document.getElementById('training-target-dialog');
+    document.querySelectorAll('[data-training-result-form]').forEach(form => {
+        const sessionType = form.querySelector('[name="session_type"]');
+        const eventTestTime = form.querySelector('[data-event-test-time-field]');
+        if (!sessionType || !eventTestTime) return;
+        const updateTimeField = () => {
+            const isEventTest = sessionType.value === 'event_test';
+            eventTestTime.hidden = !isEventTest;
+            eventTestTime.querySelectorAll('input').forEach(input => {
+                input.disabled = !isEventTest;
+                if (!isEventTest) input.value = '';
+            });
+        };
+        sessionType.addEventListener('change', updateTimeField);
+        updateTimeField();
+    });
     if (!dialog || typeof dialog.showModal !== 'function') return;
     const openButtons = document.querySelectorAll('[data-open-target-dialog]');
     const closeButton = document.getElementById('close-training-target-dialog');

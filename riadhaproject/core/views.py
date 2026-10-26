@@ -21,6 +21,7 @@ from django.utils import timezone
 from core.models import AthleteProfile, Event, Performance, Verification, TrainingPlan, TrainingTarget
 from .forms import SignUpForm, AthleteProfileForm, PerformanceForm, TrainingPlanForm, TrainingTargetForm, TrainingResultForm
 from .sakatalent_knowledge import get_sakatalent_knowledge
+from .training_guidance import get_event_training_guidance
 
 logger = logging.getLogger(__name__)
 MAIN_RANKING_MIN_RACES = 2
@@ -324,11 +325,17 @@ def training_dashboard(request):
     for target in targets:
         results = list(target.training_results.all())
         target.latest_result = results[0] if results else None
-        target.best_result = min(results, key=lambda result: result.result) if results else None
+        event_tests = [
+            result for result in results
+            if result.session_type == 'event_test' and result.result is not None
+        ]
+        target.latest_test_result = event_tests[0] if event_tests else None
+        target.best_result = min(event_tests, key=lambda result: result.result) if event_tests else None
         target.training_count = len(results)
         target.days_until_championship = (target.competition_date - today).days
-        if target.latest_result:
-            target.latest_time_gap = abs(target.target_result - target.latest_result.result)
+        if target.latest_test_result:
+            target.latest_test_time_gap = abs(target.target_result - target.latest_test_result.result)
+        target.training_guidance = get_event_training_guidance(target.event.name)
         if target.pk not in result_forms:
             result_forms[target.pk] = TrainingResultForm(target=target)
 

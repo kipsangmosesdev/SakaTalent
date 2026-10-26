@@ -259,24 +259,60 @@ class TrainingTargetForm(forms.ModelForm):
 
 
 class TrainingResultForm(forms.ModelForm):
-    result = RaceTimeField(label='Training time')
+    session_type = forms.ChoiceField(
+        label='Workout type',
+        choices=(('', 'Choose a workout type'), *TrainingResult.SESSION_TYPE_CHOICES),
+        widget=forms.Select(attrs={
+            'class': 'w-full rounded-lg border border-slate-300 bg-white px-3 py-2 text-sm',
+        }),
+    )
+    notes = forms.CharField(
+        label='Workout details',
+        required=False,
+        max_length=600,
+        widget=forms.Textarea(attrs={
+            'rows': 2,
+            'placeholder': 'Example: 6 × 200m with 2 minutes recovery',
+            'class': 'w-full rounded-lg border border-slate-300 px-3 py-2 text-sm',
+        }),
+    )
+    result = RaceTimeField(label='Full-event test time', required=False)
 
     class Meta:
         model = TrainingResult
-        fields = ('training_date', 'result', 'notes')
+        fields = ('training_date', 'session_type', 'notes', 'result')
         widgets = {
-            'training_date': forms.DateInput(attrs={'type': 'date'}),
-            'notes': forms.TextInput(attrs={'placeholder': 'Optional session notes'}),
+            'training_date': forms.DateInput(attrs={
+                'type': 'date',
+                'class': 'w-full rounded-lg border border-slate-300 px-3 py-2 text-sm',
+            }),
+            'session_type': forms.Select(attrs={
+                'class': 'w-full rounded-lg border border-slate-300 bg-white px-3 py-2 text-sm',
+            }),
         }
 
     def __init__(self, *args, target, **kwargs):
         self.target = target
         super().__init__(*args, **kwargs)
+        if not self.is_bound and not self.instance.pk:
+            self.initial['session_type'] = ''
+        self.fields['session_type'].help_text = 'Choose what this workout focused on. Use full-event time trial only when you ran the complete target event distance.'
+        self.fields['result'].help_text = 'Only full-event time trials are compared with your target time.'
 
     def clean_training_date(self):
         training_date = self.cleaned_data['training_date']
         if training_date > timezone.localdate():
             raise forms.ValidationError('Training date cannot be in the future.')
         if training_date >= self.target.competition_date:
-            raise forms.ValidationError('Training results must be dated before competition day.')
+            raise forms.ValidationError('Training sessions must be dated before competition day.')
         return training_date
+
+    def clean(self):
+        cleaned_data = super().clean()
+        session_type = cleaned_data.get('session_type')
+        result = cleaned_data.get('result')
+        if session_type == 'event_test' and result is None:
+            self.add_error('result', 'Enter the full-event time for this time trial.')
+        elif session_type and session_type != 'event_test' and result is not None:
+            self.add_error('result', 'Only full-event time trials can be compared with your target.')
+        return cleaned_data
