@@ -69,6 +69,12 @@
             max-width: 100%;
         }
 
+        .sotet-image-protected {
+            -webkit-user-drag: none;
+            -webkit-touch-callout: none;
+            user-select: none;
+        }
+
         h1, h2, h3, h4, .font-heading {
             font-family: 'Barlow', sans-serif;
             letter-spacing: 0.025em;
@@ -430,6 +436,15 @@
             iconClose.classList.toggle('hidden');
             menuButton.setAttribute('aria-expanded', String(!menu.classList.contains('hidden')));
         }
+
+        // Discourage casual saving or dragging of Sotet's avatar. This cannot prevent
+        // retrieval through browser developer tools or the underlying image URL.
+        document.addEventListener('contextmenu', event => {
+            if (event.target.closest('.sotet-image-protected')) event.preventDefault();
+        });
+        document.addEventListener('dragstart', event => {
+            if (event.target.closest('.sotet-image-protected')) event.preventDefault();
+        });
 
         (() => {
             const dialog = document.getElementById('pwa-install-dialog');
