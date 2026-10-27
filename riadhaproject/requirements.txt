@@ -7,6 +7,3 @@ django-htmlmin
 dj-database-url
 psycopg[binary]
 django-storages[s3]
-python-docx
-reportlab
-pypdf
